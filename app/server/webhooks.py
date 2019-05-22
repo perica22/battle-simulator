@@ -17,11 +17,10 @@ class WebhookService():
         
         for url in webhook_urls:
             pass
-            '''
-            response = requests.post(url, data=webhook_payload, headers=headers)
+           
+            response = requests.post(url, data=json.dumps(webhook_payload), headers=headers)
             if response.status_code == 200:
                 continue
-            '''
 
     #def create_army_leave_webhook
     #def create_army_update_webhook
