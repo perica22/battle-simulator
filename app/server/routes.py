@@ -3,10 +3,10 @@ from flask import request, jsonify, make_response
 
 from app import app, db
 
-from app.models import Army
-from app.response import create_single_army_response
-from app.validation import validate_army_create
-from app.webhooks import WebhookService
+from app.server.models import Army
+from app.server.response import create_single_army_response
+from app.server.validation import validate_army_create
+from app.server.webhooks import WebhookService
 
 
 webhook_service = WebhookService()
@@ -14,7 +14,7 @@ webhook_service = WebhookService()
 @app.route('/starwars/api/join', methods=['POST'])
 def join():
     rj = request.get_json()
-
+    
     # Army validation
     errors = validate_army_create(rj)
     if errors:
@@ -25,9 +25,6 @@ def join():
         number_squads=rj['number_squads'], 
         webhook_url=rj['webhook_url'])
     db.session.add(army)
-
-    # add army access token
-    army.access_token = army.generate_hash()
     db.session.commit()
     
     # triggering army.join webhook

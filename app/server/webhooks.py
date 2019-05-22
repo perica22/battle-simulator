@@ -1,6 +1,7 @@
 import requests
-from app.models import Army
-from app.response import create_single_army_join_webhook
+import json
+from app.server.models import Army
+from app.server.response import create_single_army_join_webhook
 
 class WebhookService():
 
@@ -9,9 +10,9 @@ class WebhookService():
                    "Webhook-Topic": 'army.join'}
 
         armys = Army.query.filter_by(status='alive').all()
-
+        url =str(payload.webhook_url)
         webhook_payload = create_single_army_join_webhook(payload)
-
+        #response = requests.post(url, data=json.dumps(webhook_payload), headers=headers)
         webhook_urls = [army.webhook_url for army in armys]
         
         for url in webhook_urls:
