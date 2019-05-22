@@ -6,24 +6,10 @@ from app import app, db
 from app.models import Army
 from app.response import create_single_army_response
 from app.validation import validate_army_create
+from app.webhooks import WebhookService
 
 
-def validate_army_create(payload):
-    errors = []
-    if 'name' not in payload:
-        errors.append('name is required field')
-
-    if 'number_squads' not in payload:
-        errors.append('number_squads is required field')
-    else:
-        if payload['number_squads'] > 100 or payload['number_squads'] < 10:
-            errors.append('number_squads must be between 10 and 100')
-
-    if 'webhook_url' not in payload:
-        errors.append('webhook_url is required field')
-
-    return errors
-
+webhook_service = WebhookService()
 
 @app.route('/starwars/api/join', methods=['POST'])
 def join():
@@ -39,12 +25,14 @@ def join():
         number_squads=rj['number_squads'], 
         webhook_url=rj['webhook_url'])
     db.session.add(army)
+
+    # add army access token
+    army.access_token = army.generate_hash()
     db.session.commit()
     
-    # TODO!: trigger army.join webhook and send it to all registred armys
-    # with ID of the army and the number of their squads.
+    # triggering army.join webhook
+    army_join_webhook = webhook_service.create_army_join_webhook(army)
 
-    # TODO!: create func for creating obj response or do a schema 
     result = create_single_army_response(army)
 
     response = make_response(json.dumps(result), 200)
