@@ -1,6 +1,6 @@
 import requests
 import json
-from flask import request, jsonify, make_response
+from flask import request
 
 from app import app
 
@@ -18,14 +18,12 @@ def client1():
         url ='http://127.0.0.1:5000/starwars/api/join'
 
         response = requests.post(url, data=json.dumps(data), headers=headers)
-        import ipdb
-        ipdb.set_trace()
         if response.status_code == 200:
             access_token = resoponse.json()['army']['access_token']
         else:
             print('nije uspesno') 
 
-        
+
     else:
         import ipdb
         ipdb.set_trace()
