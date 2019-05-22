@@ -4,13 +4,9 @@ from flask import request, jsonify, make_response
 from app import app, db
 
 from app.models import Army
+from app.response import create_single_army_response
+from app.validation import validate_army_create
 
-'''
-def create_single_army_response(data):
-    obj = []
-
-    obj = obj + [('id', data["id"])]
-'''
 
 def validate_army_create(payload):
     errors = []
@@ -49,10 +45,11 @@ def join():
     # with ID of the army and the number of their squads.
 
     # TODO!: create func for creating obj response or do a schema 
-    #result = create_single_army_response(army.get_public())
-    #response = make_response(json.dumps(result), 200)
-    #response.mimetype = "application/json"
-    return 'success: {}'.format(army.__dict__)
+    result = create_single_army_response(army)
+
+    response = make_response(json.dumps(result), 200)
+    response.mimetype = "application/json"
+    return response
 
 
 @app.route('/starwars/api/attack/<int:army_id>', methods=['PUT'])
