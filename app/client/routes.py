@@ -24,8 +24,6 @@ def client1():
             return access_token
         else:
             print('nije uspesno') 
-
-
     else:
         rj = request.get_json()
         response = make_response(json.dumps(rj), 200)
