@@ -4,15 +4,17 @@ from flask import request, jsonify, make_response
 from app import app, db
 
 from app.server.models import Army
-from app.server.response import create_single_army_response
+from app.server.response import ResponseCreate
 from app.server.validation import validate_army_create
 from app.server.webhooks import WebhookService
 
 
-webhook_service = WebhookService()
+
 
 @app.route('/starwars/api/join', methods=['POST'])
 def join():
+    webhook_service = WebhookService(topic='army.join')
+    response_create = ResponseCreate()
     rj = request.get_json()
     
     # Army validation
@@ -30,7 +32,7 @@ def join():
     # triggering army.join webhook
     army_join_webhook = webhook_service.create_army_join_webhook(army)
 
-    result = create_single_army_response(army)
+    result = response_create.create_single_army_response(army)
 
     response = make_response(json.dumps(result), 200)
     response.mimetype = "application/json"
