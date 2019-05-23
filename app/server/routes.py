@@ -1,5 +1,5 @@
 import json
-from flask import request, jsonify, make_response
+from flask import request, jsonify, make_response, session, redirect, url_for
 
 from app import app, db
 
@@ -16,7 +16,7 @@ def join():
     webhook_service = WebhookService(topic='army.join')
     response_create = ResponseCreate()
     rj = request.get_json()
-    
+
     # Army validation
     errors = validate_army_create(rj)
     if errors:
@@ -42,13 +42,15 @@ def join():
 @app.route('/starwars/api/attack/<int:army_id>', methods=['PUT'])
 def attack(army_id):
     rj = request.get_json()
-
+    #import ipdb
+    #ipdb.set_trace()    
     # check if army exists
     army = Army.query.filter_by(id=army_id).first()
     if army is None:
         return jsonify({"error": "army not found"}), 404
 
     # TODO!: here i will need to add service for attacking logic
+    AttackService(rj, army).attack()
 
     return "this is the attack route, you can begin your attack"
 

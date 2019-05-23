@@ -7,11 +7,13 @@ from flask_session import Session
 
 
 app = Flask(__name__)
-#app.secret_key = '_5#y2L"F4Q8z\n\xec]/'
+app.config['SESSION_TYPE'] = 'filesystem'
+#app.config['SERVER_NAME'] = 'localhost.'
 app.config.from_object(Config)
+Session(app)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
-#Session(app)
+app.debug = True
 
 
 from app.server import routes, models
