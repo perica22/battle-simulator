@@ -7,7 +7,7 @@ from app.server.models import Army
 from app.server.response import ResponseCreate
 from app.server.validation import validate_army_create
 from app.server.webhooks import WebhookService
-
+from app.server.attack_service import AttackService
 
 
 
@@ -42,15 +42,24 @@ def join():
 @app.route('/starwars/api/attack/<int:army_id>', methods=['PUT'])
 def attack(army_id):
     rj = request.get_json()
-    #import ipdb
-    #ipdb.set_trace()    
+    
     # check if army exists
-    army = Army.query.filter_by(id=army_id).first()
-    if army is None:
+    defence_army = Army.query.filter_by(id=army_id).first()
+    if defence_army is None:
         return jsonify({"error": "army not found"}), 404
 
-    # TODO!: here i will need to add service for attacking logic
-    AttackService(rj, army).attack()
+    attack_army = Army.query.filter_by(name=rj['name']).first()
+
+    attack_service = AttackService(attack_army, defence_army)
+    # saving battle in the db
+    battle = attack_service.create()
+
+    # repeting the battle until success or max num of retrys is reached
+    for number in range(attack_army.number_squads):
+        with attack_service:
+            response = attack_service.attack(battle)
+            if response != 'try_again':
+                return redirect(url_for(response))
 
     return "this is the attack route, you can begin your attack"
 

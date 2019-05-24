@@ -1,7 +1,7 @@
 from collections import OrderedDict
 
 
-class ResponseCreate():
+class ResponseCreate:
 
     def create_single_army_response(self, data):
         obj = {}

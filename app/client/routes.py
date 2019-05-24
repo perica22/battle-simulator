@@ -1,26 +1,28 @@
-import requests
-import random
 import json
+import random
+import requests
+
 from flask import request, make_response, session, redirect, url_for
 
 from app import app
 
+
 headers = {"Content-Type": "application/json"}
+join_url = 'http://127.0.0.1:5000/starwars/api/join'
+#army_to_attack = random.choice([army['number_squads'] for army in joined_armys])
 
 @app.route('/client2', methods=['GET', 'POST'])
 def client2():
     # method for joinging the game / not used after that 
     data = {
-        "name":"perica2",
-        "number_squads": 50,
+        "name":"client2",
+        "number_squads": 10,
         "webhook_url": "http://127.0.0.1:5000/client2/webhook"
     }
-    url ='http://127.0.0.1:5000/starwars/api/join'
 
-    response = requests.post(url, data=json.dumps(data), headers=headers)
+    response = requests.post(join_url, data=json.dumps(data), headers=headers)
     if response.status_code == 200:
         access_token = response.json()['army']['access_token']
-        print(access_token)
         return access_token
     else:
        print('-------------nije uspesno-------------')
@@ -30,16 +32,14 @@ def client2():
 def client3():
     # method for joinging the game / not used after that 
     data = {
-        "name":"perica3",
-        "number_squads": 100,
+        "name":"client3",
+        "number_squads": 15,
         "webhook_url": "http://127.0.0.1:5000/client3/webhook"
     }
-    url ='http://127.0.0.1:5000/starwars/api/join'
 
-    response = requests.post(url, data=json.dumps(data), headers=headers)
+    response = requests.post(join_url, data=json.dumps(data), headers=headers)
     if response.status_code == 200:
         access_token = response.json()['army']['access_token']
-        print(access_token)
         #return access_token
         return redirect(url_for('client2'))
     else:
@@ -63,37 +63,44 @@ def client2_webhook():
 
 @app.route('/client3/webhook', methods=['GET', 'POST'])
 def client3_webhook():
-    # attack strategy: Lower number of squads
-    print(session.get('joined_armys_client3'))
-    if session.get('joined_armys_client3'):
+    '''
+        - route for receiving webhooks 
+        - redirects to /attack route 
+        - attack strategy: Lower number of squads
+    '''
+    print('joined_armys_client3' in session)
+    if 'joined_armys_client3' in session:
         import ipdb
         ipdb.set_trace()
     rj = request.get_json()['army']
     if 'joined_armys' not in session or rj['number_squads'] < session['joined_armys']:
         session['joined_armys_client3'] = rj
 
-    print(session.get('joined_armys_client3', None))
-    #army_to_attack = random.choice([army['number_squads'] for army in joined_armys])
-    if session.get('joined_armys_client3')['number_squads'] < 100:
-        #import ipdb
-        #ipdb.set_trace()
+    return redirect(url_for('client3_strategy'))
+
+@app.route('/client3/strategy', methods=['GET'])
+def client3_strategy():
+    print('joined_armys_client3' in session)
+
+    if 'joined_armys_client3' in session and session.get('joined_armys_client3')['number_squads'] < 15:
         #redirect for attack
         return redirect(url_for('client3_attack'))
 
     # TODO what in case when i don't want to attack ? ? ? ?
 
-
 @app.route('/client3/attack', methods=['GET', 'POST'])
 def client3_attack():
-    #attack
+    '''
+        - attack route
+        - TODO: need to figure out what in case of success
+    '''
     data = {
-        "name":"perica3",
-        "number_squads": 100
+        "name":"client3",
+        "number_squads": 10
     }
     url ='http://127.0.0.1:5000/starwars/api/attack/{}'.format(session.get('joined_armys_client3')['id'])
 
     response = requests.put(url, data=json.dumps(data), headers=headers)
-
     if response.status_code == 200:
         return 'success'
     else:

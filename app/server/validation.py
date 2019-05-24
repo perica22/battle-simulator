@@ -1,4 +1,3 @@
-
 def validate_army_create(payload):
     errors = []
     if 'name' not in payload:

@@ -2,6 +2,8 @@ from app import db
 import os
 from uuid import uuid1
 
+
+
 def generate_hash():
     hash = str(uuid1())
     return hash
@@ -17,3 +19,20 @@ class Army(db.Model):
 
     def __repr__(self):
         return '<Army {}>'.format(self.name)
+
+
+class Battle(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    attack_army_id = db.Column(db.Integer)
+    attack_army_name = db.Column(db.String(64))
+    defence_army_id = db.Column(db.Integer)
+    defence_army_name = db.Column(db.String(64))
+    defence_army_number_squads = db.Column(db.Integer)
+    attack_army_number_squads = db.Column(db.Integer)
+    num_of_attacks = db.Column(db.Integer)
+
+    def __repr__(self):
+        return '<Battle {} - {}'.format(self.attack_army_name, self.defence_army_name)
+
+    def change_army_number_squads(self, defense_army):
+        defense_army.number_squads = self.defence_army_number_squads

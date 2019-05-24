@@ -5,12 +5,12 @@ from app.server.response import ResponseCreate
 
 
 
-class WebhookService():
+class WebhookService:
     
     def __init__(self, topic):
         self.topic = topic
         self.headers = {"Content-Type": "application/json",
-                   "Webhook-Topic": self.topic}
+                        "Webhook-Topic": self.topic}
         self.response_create = ResponseCreate()
 
     def create_army_join_webhook(self, payload):
