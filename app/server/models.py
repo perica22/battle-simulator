@@ -36,3 +36,5 @@ class Battle(db.Model):
 
     def change_army_number_squads(self, defense_army):
         defense_army.number_squads = self.defence_army_number_squads
+        if defense_army.number_squads == 0:
+            defense_army.status = 'dead'

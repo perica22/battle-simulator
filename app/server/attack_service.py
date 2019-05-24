@@ -4,6 +4,7 @@ from flask import session
 from sqlalchemy.orm import sessionmaker
 from app import db
 from app.server.models import Battle
+from app.server.webhooks import WebhookService
 
 
 
@@ -14,10 +15,9 @@ class AttackService:
         self.defense_army = defense_army
         self.num_of_attacks = 1
 
-        self.lucky_value = random.randint(1, 15)
+        self.lucky_value = 10#random.randint(1, 15)
         # needs to be (range(1, 101), 100)
         self.array = random.sample(range(1, 15), 10)
-
 
     def __enter__(self):
         self.num_of_attacks += 1
@@ -42,21 +42,25 @@ class AttackService:
         if battle.num_of_attacks >= self.attack_army.number_squads:
             return jsonify({"error": "your reched the max num of attacks"}), 400
 
-        attack_value = random.randint(1,15)
+        attack_value = 10#random.randint(1,15)
         if attack_value in self.array:
-            attack_damage = self.attack_army.number_squads / self.num_of_attacks
-            self.defense_army.number_squads = self.defense_army.number_squads - attack_damage
+            attack_damage = round(self.attack_army.number_squads / self.num_of_attacks)
 
             db.session.query(Battle).update({
                 Battle.defence_army_number_squads: battle.defence_army_number_squads - attack_damage})
             battle.change_army_number_squads(self.defense_army)
             db.session.commit()
+
+            webhook_service = WebhookService(topic='army.update')
+            # triggering army.update webhook
             import ipdb
             ipdb.set_trace()
-            redirect_url = self.build_url_redirect()
+            army_join_webhook = webhook_service.create_army_update_webhook(self.defense_army)
+
+            redirect_url = self._build_url_redirect()
             return redirect_url
         else:
             return 'try again'
 
-    def build_url_redirect(self):
+    def _build_url_redirect(self):
         return "{}_strategy".format(self.attack_army.name)

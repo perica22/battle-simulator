@@ -28,3 +28,18 @@ class ResponseCreate:
         result_with_wrapper['army'] = obj
 
         return OrderedDict(result_with_wrapper)
+
+    def create_army_update_webhook_response(self, data):
+        obj = {}
+
+        obj['id'] = data.id
+        obj['squadsCount'] = data.number_squads
+        # TODO rank-rate
+        #obj['rankRate'] = 
+
+        result_with_wrapper = {}
+        result_with_wrapper['army'] = obj
+
+        return OrderedDict(result_with_wrapper)
+
+
