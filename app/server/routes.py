@@ -59,11 +59,13 @@ def attack(attack_army, army_id):
             print(response)
             time.sleep(1.0)   
             if response != 'try again':
+                time.sleep(math.floor(client_3.number_squads / 10))
                 return redirect(url_for(response))
 
     return "this is the attack route, you can begin your attack"
 
 
 @app.route('/starwars/api/leave', methods=['POST'])
+#@check_army_access_token
 def leave():
     return "this is a leave route"
