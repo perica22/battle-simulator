@@ -11,6 +11,7 @@ from app.server.attack_service import AttackService
 from app.utils import check_army_access_token
 
 
+
 @app.route('/starwars/api/join', methods=['POST'])
 def join():
     webhook_service = WebhookService()
@@ -53,12 +54,10 @@ def attack(attack_army, army_id):
     # saving battle in the db
     battle = attack_service.create()
 
-    # repeting the battle until success or max num of retrys is reached
+    # repeting the battle until success or max num of retries is reached
     for number in range(attack_army.number_squads):
         with attack_service:
             response = attack_service.attack(battle)
-            print(response)
-            time.sleep(1.0)   
             if response != 'try_again':
                 time.sleep(math.floor(attack_army.number_squads / 10))
                 return redirect(url_for(response))
