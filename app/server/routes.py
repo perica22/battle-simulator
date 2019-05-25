@@ -1,38 +1,46 @@
-import json, time
+"""server routes"""
+import json
+import time
 
-from flask import request, jsonify, make_response, session, redirect, url_for
+from flask import request, jsonify, make_response, redirect, url_for
 
-from app import app, db
+from app import APP
+from app import DB
+
 from app.server.models import Army
 from app.server.response import ResponseCreate
 from app.server.validation import validate_army_create
 from app.server.webhooks import WebhookService
 from app.server.attack_service import AttackService
-from app.utils import validate_army_access_token, calculate_reload_time
+from app.utils import calculate_reload_time, validate_army_access_token
 
 
 
-@app.route('/starwars/api/join', methods=['POST'])
+@APP.route('/starwars/api/join', methods=['POST'])
 @calculate_reload_time
 def join(**kwargs):
+    """
+    Join army route
+    """
     webhook_service = WebhookService()
     response_create = ResponseCreate()
-    rj = request.get_json()
+    request_json = request.get_json()
 
     # Army validation
-    errors = validate_army_create(rj)
+    errors = validate_army_create(request_json)
     if errors:
         return "you have an error: {}".format(errors)
 
     # TODO: add validation in case army.name value is not unique
-    army = Army(name=rj['name'], 
-        number_squads=rj['number_squads'], 
-        webhook_url=rj['webhook_url'])
-    db.session.add(army)
-    db.session.commit()
-
+    army = Army(name=request_json['name'],
+                number_squads=request_json['number_squads'],
+                webhook_url=request_json['webhook_url'])
+    DB.session.add(army)
+    DB.session.commit()
+    import ipdb
+    ipdb.set_trace()
     # triggering army.join webhook
-    army_join_webhook = webhook_service.create_army_join_webhook(army)
+    webhook_service.create_army_join_webhook(army)
 
     result = response_create.create_single_army_response(army)
 
@@ -43,12 +51,13 @@ def join(**kwargs):
     return response
 
 
-@app.route('/starwars/api/attack/<int:army_id>', methods=['PUT'])
+@APP.route('/starwars/api/attack/<int:army_id>', methods=['PUT'])
 @validate_army_access_token
 @calculate_reload_time
 def attack(attack_army, army_id, **kwargs):
-    rj = request.get_json()
-
+    """
+    Attack army route
+    """
     # check if army exists
     defence_army = Army.query.filter_by(id=army_id).first()
     if defence_army is None:
@@ -59,7 +68,7 @@ def attack(attack_army, army_id, **kwargs):
     battle = attack_service.create()
 
     # repeting the battle until success or max num of retries is reached
-    for number in range(attack_army.number_squads):
+    for _ in range(attack_army.number_squads):
         with attack_service:
             response = attack_service.attack(battle)
             if response != 'try_again':
@@ -69,14 +78,17 @@ def attack(attack_army, army_id, **kwargs):
     return "this is the attack route, you can begin your attack"
 
 
-@app.route('/starwars/api/leave', methods=['POST'])
+@APP.route('/starwars/api/leave', methods=['POST'])
 @validate_army_access_token
 @calculate_reload_time
 def leave(army, **kwargs):
+    """
+    Leave army route
+    """
     webhook_service = WebhookService()
 
     if army.status == 'left':
-        return jsonify({"error": "you already left the game"}), 200 
+        return jsonify({"error": "you already left the game"}), 200
 
     army.leave(type='left')
 

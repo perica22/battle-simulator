@@ -3,7 +3,7 @@ import random
 from flask import session
 from sqlalchemy.orm import sessionmaker
 
-from app import db
+from app import DB
 from app.server.models import Battle
 from app.server.webhooks import WebhookService
 
@@ -35,7 +35,7 @@ class AttackService:
             defence_army_number_squads=self.defence_army.number_squads,
             num_of_attacks=self.num_of_attacks,
             )
-        db.session.add(battle)
+        DB.session.add(battle)
         # not sure how to handle session *(READ)*
         return battle
 
@@ -50,10 +50,10 @@ class AttackService:
                 attack_damage = battle.defence_army_number_squads
                 die = True
 
-            db.session.query(Battle).update({
+            DB.session.query(Battle).update({
                 Battle.defence_army_number_squads: battle.defence_army_number_squads - attack_damage})
             battle.change_army_number_squads(self.defence_army)
-            db.session.commit()
+            DB.session.commit()
 
             # triggering webhooks for battle
             self._trigger_webhooks(die)
