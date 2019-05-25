@@ -22,7 +22,7 @@ def calculate_reload_time(f):
         return f(*args, **kwargs)
     return decorated
 
-def check_army_access_token(f):
+def validate_army_access_token(f):
     """
     This is the decorator checking access token.
     """

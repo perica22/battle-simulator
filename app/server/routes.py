@@ -8,7 +8,7 @@ from app.server.response import ResponseCreate
 from app.server.validation import validate_army_create
 from app.server.webhooks import WebhookService
 from app.server.attack_service import AttackService
-from app.utils import check_army_access_token, calculate_reload_time
+from app.utils import validate_army_access_token, calculate_reload_time
 
 
 
@@ -44,7 +44,7 @@ def join(**kwargs):
 
 
 @app.route('/starwars/api/attack/<int:army_id>', methods=['PUT'])
-@check_army_access_token
+@validate_army_access_token
 @calculate_reload_time
 def attack(attack_army, army_id, **kwargs):
     rj = request.get_json()
