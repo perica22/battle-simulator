@@ -23,6 +23,8 @@ class Army(db.Model):
     def __repr__(self):
         return '<Army {}>'.format(self.name)
 
+    def leave(self, type):
+        self.status = 'left'
 
 class Battle(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

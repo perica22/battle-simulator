@@ -17,8 +17,11 @@ def calculate_reload_time(f):
     """
     @wraps(f)
     def decorated(*args, **kwargs):
-        rj = request.get_json()['number_squads']
-        kwargs['reload_time'] = math.floor(rj / 10)
+        try:
+            number_squads = args[0].number_squads
+        except:
+            number_squads = request.get_json()['number_squads']
+        kwargs['reload_time'] = math.floor(number_squads / 10)
         return f(*args, **kwargs)
     return decorated
 
@@ -29,11 +32,11 @@ def validate_army_access_token(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         access_token = request.args.get('accessToken')
-        attack_army = Army.query.filter_by(
+        army = Army.query.filter_by(
             access_token=access_token).first()
-        if attack_army is None:
+        if not army:
             return jsonify({"error": "invalid access_token"}), 404
-        return f(attack_army, **kwargs)
+        return f(army, **kwargs)
     return decorated
 
 # using class repr instead of sessions

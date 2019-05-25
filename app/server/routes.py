@@ -30,7 +30,7 @@ def join(**kwargs):
         webhook_url=rj['webhook_url'])
     db.session.add(army)
     db.session.commit()
-    
+
     # triggering army.join webhook
     army_join_webhook = webhook_service.create_army_join_webhook(army)
 
@@ -53,7 +53,7 @@ def attack(attack_army, army_id, **kwargs):
     defence_army = Army.query.filter_by(id=army_id).first()
     if defence_army is None:
         return jsonify({"error": "army not found"}), 404
-    
+
     attack_service = AttackService(attack_army, defence_army)
     # saving battle in the db
     battle = attack_service.create()
@@ -70,7 +70,19 @@ def attack(attack_army, army_id, **kwargs):
 
 
 @app.route('/starwars/api/leave', methods=['POST'])
-#@check_army_access_token
-#@calculate_reload_time
-def leave():
-    return "this is a leave route"
+@validate_army_access_token
+@calculate_reload_time
+def leave(army, **kwargs):
+    webhook_service = WebhookService()
+
+    if army.status == 'left':
+        return jsonify({"error": "you already left the game"}), 200 
+
+    army.leave(type='left')
+
+    # trigger army.leave webhook
+    webhook_service.create_army_leave_webhook(army, type='left')
+
+    time.sleep(kwargs['reload_time'])
+
+    return jsonify({"success": "you have left the game"}), 200
