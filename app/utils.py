@@ -1,3 +1,4 @@
+import math
 from functools import wraps
 
 from flask import request, jsonify
@@ -10,12 +11,16 @@ HEADERS = {"Content-Type": "application/json"}
 JOIN_URL = 'http://127.0.0.1:5000/starwars/api/join'
 
 
-def generate_hash():
-    '''
-    This is generating hash for Army model
-    '''
-    hash = str(uuid1())
-    return hash
+def calculate_reload_time(f):
+    """
+    This is the decorator calculating server reload time
+    """
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        rj = request.get_json()['number_squads']
+        kwargs['reload_time'] = math.floor(rj / 10)
+        return f(*args, **kwargs)
+    return decorated
 
 def check_army_access_token(f):
     """

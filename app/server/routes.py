@@ -1,4 +1,4 @@
-import json, time, math
+import json, time
 
 from flask import request, jsonify, make_response, session, redirect, url_for
 
@@ -8,12 +8,13 @@ from app.server.response import ResponseCreate
 from app.server.validation import validate_army_create
 from app.server.webhooks import WebhookService
 from app.server.attack_service import AttackService
-from app.utils import check_army_access_token
+from app.utils import check_army_access_token, calculate_reload_time
 
 
 
 @app.route('/starwars/api/join', methods=['POST'])
-def join():
+@calculate_reload_time
+def join(**kwargs):
     webhook_service = WebhookService()
     response_create = ResponseCreate()
     rj = request.get_json()
@@ -37,12 +38,15 @@ def join():
 
     response = make_response(json.dumps(result), 200)
     response.mimetype = "application/json"
+
+    time.sleep(kwargs['reload_time'])
     return response
 
 
 @app.route('/starwars/api/attack/<int:army_id>', methods=['PUT'])
 @check_army_access_token
-def attack(attack_army, army_id):
+@calculate_reload_time
+def attack(attack_army, army_id, **kwargs):
     rj = request.get_json()
 
     # check if army exists
@@ -59,7 +63,7 @@ def attack(attack_army, army_id):
         with attack_service:
             response = attack_service.attack(battle)
             if response != 'try_again':
-                time.sleep(math.floor(attack_army.number_squads / 10))
+                time.sleep(kwargs['reload_time'])
                 return redirect(url_for(response))
 
     return "this is the attack route, you can begin your attack"
@@ -67,5 +71,6 @@ def attack(attack_army, army_id):
 
 @app.route('/starwars/api/leave', methods=['POST'])
 #@check_army_access_token
+#@calculate_reload_time
 def leave():
     return "this is a leave route"
