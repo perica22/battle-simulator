@@ -18,3 +18,4 @@ app.debug = True
 
 from app.server import routes, models
 from app.client import routes
+from app import utils
