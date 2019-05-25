@@ -13,7 +13,7 @@ from app.utils import check_army_access_token
 
 @app.route('/starwars/api/join', methods=['POST'])
 def join():
-    webhook_service = WebhookService(topic='army.join')
+    webhook_service = WebhookService()
     response_create = ResponseCreate()
     rj = request.get_json()
 
@@ -43,6 +43,7 @@ def join():
 @check_army_access_token
 def attack(attack_army, army_id):
     rj = request.get_json()
+
     # check if army exists
     defence_army = Army.query.filter_by(id=army_id).first()
     if defence_army is None:
@@ -58,8 +59,8 @@ def attack(attack_army, army_id):
             response = attack_service.attack(battle)
             print(response)
             time.sleep(1.0)   
-            if response != 'try again':
-                time.sleep(math.floor(client_3.number_squads / 10))
+            if response != 'try_again':
+                time.sleep(math.floor(attack_army.number_squads / 10))
                 return redirect(url_for(response))
 
     return "this is the attack route, you can begin your attack"

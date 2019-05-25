@@ -1,12 +1,15 @@
-import json
-import random
-import requests
-import time
+import json, random, requests, time
+
+from flask import request, make_response, session, redirect, url_for
 
 from app import app
-from flask import request, make_response, session, redirect, url_for
 from app.utils import client_3, client_2, HEADERS, JOIN_URL
 
+'''
+TODO: 
+    - implement /leave route
+    - then next think should be client side of game :) 
+'''
 
 
 @app.route('/client2', methods=['GET', 'POST'])
@@ -18,7 +21,7 @@ def client2():
         army = response.json()['army']
         client_2.set_access_token(army['access_token'])
         client_2.set_army_id(army['id'])
-        time.sleep(5.0)
+        time.sleep(10.0)
         return access_token
     else:
        print('-------------nije uspesno-------------')
@@ -60,12 +63,8 @@ def client3_webhook():
         - attack strategy: Lower number of squads
     '''
     if request.headers['Webhook-Topic'] == 'army.update':
-        import ipdb
-        ipdb.set_trace()
-    print('joined_armys_client3' in session)
-    if 'joined_armys_client3' in session:
-        import ipdb
-        ipdb.set_trace()
+        pass
+
     rj = request.get_json()['army']
     if 'joined_armys' not in session or rj['number_squads'] < session['joined_armys']:
         session['joined_armys_client3'] = rj
@@ -96,7 +95,7 @@ def client3_attack():
         "number_squads": client_3.number_squads
     }
     url ='http://127.0.0.1:5000/starwars/api/attack/{}?accessToken={}'.format(
-        session.get('joined_armys_client3')['id'], access_tokens['client3'])
+        session.get('joined_armys_client3')['id'], client_3.access_token)
     print(url)
 
     response = requests.put(url, data=json.dumps(data), headers=HEADERS)

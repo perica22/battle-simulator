@@ -42,4 +42,13 @@ class ResponseCreate:
 
         return OrderedDict(result_with_wrapper)
 
+    def create_army_leave_webhook_response(self, data, type):
+        obj = {}
 
+        obj['id'] = data.id
+        obj['typeOfLeave'] = type
+
+        result_with_wrapper = {}
+        result_with_wrapper['army'] = obj
+
+        return OrderedDict(result_with_wrapper)

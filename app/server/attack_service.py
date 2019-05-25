@@ -2,6 +2,7 @@ import random
 
 from flask import session
 from sqlalchemy.orm import sessionmaker
+
 from app import db
 from app.server.models import Battle
 from app.server.webhooks import WebhookService
@@ -17,7 +18,7 @@ class AttackService:
 
         self.lucky_value = 10#random.randint(1, 15)
         # needs to be (range(1, 101), 100)
-        self.array = random.sample(range(1, 15), 10)
+        self.array = [1,2,3,4,5,6,7,8,9,10]#random.sample(range(1, 15), 10)
 
     def __enter__(self):
         self.num_of_attacks += 1
@@ -47,21 +48,30 @@ class AttackService:
             attack_damage = round(self.attack_army.number_squads / self.num_of_attacks)
             if attack_damage > battle.defence_army_number_squads:
                 attack_damage = battle.defence_army_number_squads
+                die = True
 
             db.session.query(Battle).update({
                 Battle.defence_army_number_squads: battle.defence_army_number_squads - attack_damage})
             battle.change_army_number_squads(self.defence_army)
             db.session.commit()
 
-            webhook_service = WebhookService(topic='army.update')
-            # triggering army.update webhook
-            webhook_service.create_army_update_dead_webhook(self.defence_army)
-            webhook_service.create_army_update_alive_webhook(self.defence_army)
+            # triggering webhooks for battle
+            self._trigger_webhooks(die)
 
             redirect_url = self._build_url_redirect()
             return redirect_url
         else:
-            return 'try again'
+            return 'try_again'
+
+    def _trigger_webhooks(self, die=False):
+        webhook_service = WebhookService()
+
+        # triggering army.update webhook
+        webhook_service.create_army_update_webhook(self.defence_army, self.attack_army)
+
+        # army.leave webhook in case army died
+        if die == True:
+            webhook_service.create_army_leave_webhook(self.defence_army, type='die')
 
     def _build_url_redirect(self):
         return "{}_strategy".format(self.attack_army.name)

@@ -1,5 +1,7 @@
 from functools import wraps
+
 from flask import request, jsonify
+
 from app.server.models import Army
 
 
@@ -7,6 +9,13 @@ from app.server.models import Army
 HEADERS = {"Content-Type": "application/json"}
 JOIN_URL = 'http://127.0.0.1:5000/starwars/api/join'
 
+
+def generate_hash():
+    '''
+    This is generating hash for Army model
+    '''
+    hash = str(uuid1())
+    return hash
 
 def check_army_access_token(f):
     """
@@ -22,7 +31,7 @@ def check_army_access_token(f):
         return f(attack_army, **kwargs)
     return decorated
 
-#army_to_attack = random.choice([army['number_squads'] for army in joined_armys])
+# using class repr instead of sessions
 class Client():
     def __init__(self, name, number_squads, webhook_url):
         self.name = name
@@ -43,3 +52,4 @@ class Client():
 client_2 = Client('client2', 10, "http://127.0.0.1:5000/client2/webhook")
 client_3 = Client('client3', 15, "http://127.0.0.1:5000/client3/webhook")
 
+#army_to_attack = random.choice([army['number_squads'] for army in joined_armys])

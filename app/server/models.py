@@ -1,12 +1,10 @@
-from app import db
 import os
 from uuid import uuid1
 
+from app import db
+from app.utils import generate_hash
 
 
-def generate_hash():
-    hash = str(uuid1())
-    return hash
 
 class Army(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
