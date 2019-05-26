@@ -1,6 +1,11 @@
-
+"""
+Validation functions
+"""
 
 def validate_army_create(payload):
+    """
+    validating required params
+    """
     errors = []
     if 'name' not in payload:
         errors.append('name is required field')

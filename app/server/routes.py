@@ -12,7 +12,7 @@ from app.server.response import ResponseCreate
 from app.server.validation import validate_army_create
 from app.server.webhooks import WebhookService
 from app.server.attack_service import AttackService
-from app.utils import calculate_reload_time, validate_army_access_token
+from app.server.utils import calculate_reload_time, validate_army_access_token
 
 
 
@@ -32,13 +32,13 @@ def join(**kwargs):
         return "you have an error: {}".format(errors)
 
     # TODO: add validation in case army.name value is not unique
+    # and possibl yremove session
     army = Army(name=request_json['name'],
                 number_squads=request_json['number_squads'],
                 webhook_url=request_json['webhook_url'])
     DB.session.add(army)
     DB.session.commit()
-    import ipdb
-    ipdb.set_trace()
+
     # triggering army.join webhook
     webhook_service.create_army_join_webhook(army)
 
@@ -90,10 +90,10 @@ def leave(army, **kwargs):
     if army.status == 'left':
         return jsonify({"error": "you already left the game"}), 200
 
-    army.leave(type='left')
+    army.leave(leave_type='left')
 
     # trigger army.leave webhook
-    webhook_service.create_army_leave_webhook(army, type='left')
+    webhook_service.create_army_leave_webhook(army, leave_type='left')
 
     time.sleep(kwargs['reload_time'])
 

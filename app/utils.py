@@ -5,10 +5,10 @@ HEADERS = {"Content-Type": "application/json"}
 JOIN_URL = 'http://127.0.0.1:5000/starwars/api/join'
 
 
-# using class repr instead of sessions
 class Client():
     """
-    hardcoded data for clients
+    - Hardcoded data for clients
+    - Using class instead of sessions
     """
     def __init__(self, name, number_squads, webhook_url):
         self.name = name

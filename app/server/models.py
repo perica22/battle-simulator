@@ -19,7 +19,7 @@ class Army(DB.Model):
     name = DB.Column(DB.String(64))
     number_squads = DB.Column(DB.Integer)
     webhook_url = DB.Column(DB.String(120))
-    access_token = DB.Column(DB.String(120), generate_hash(), unique=True)
+    access_token = DB.Column(DB.String(120), default=lambda:generate_hash(), unique=True)
     status = DB.Column(DB.String(64), default='alive')
     join_type = DB.Column(DB.String(64), default='new')
 
