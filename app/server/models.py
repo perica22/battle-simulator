@@ -4,6 +4,7 @@ from uuid import uuid1
 from app import DB
 
 
+
 def generate_hash():
     '''
     This is generating hash for Army model
@@ -11,15 +12,16 @@ def generate_hash():
     token_hash = str(uuid1())
     return token_hash
 
+
 class Army(DB.Model):
     """
     Army table model
     """
-    id = DB.Column(DB.Integer, primary_key=True, autoincrement=True)
+    id = DB.Column(DB.Integer, primary_key=True, autoincrement=True, unique=True)
     name = DB.Column(DB.String(64))
     number_squads = DB.Column(DB.Integer)
     webhook_url = DB.Column(DB.String(120))
-    access_token = DB.Column(DB.String(120), default=lambda:generate_hash(), unique=True)
+    access_token = DB.Column(DB.String(120), default=lambda: generate_hash(), unique=True)
     status = DB.Column(DB.String(64), default='alive')
     join_type = DB.Column(DB.String(64), default='new')
 
@@ -29,6 +31,10 @@ class Army(DB.Model):
     def leave(self, leave_type):
         """changing status of army"""
         self.status = leave_type
+
+    def join_type_update(self):
+        """changing join_type of army"""
+        self.join_type = 'returned'
 
 class Battle(DB.Model):
     """

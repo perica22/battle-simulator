@@ -1,20 +1,23 @@
 """Service for handling battle"""
-import random
+#import random
 
 from flask import jsonify
 
 from app import DB
-from app.server.models import Battle
-from app.server.webhooks import WebhookService
+from .models import Battle, Army
+from .webhooks import WebhookService
 
 
 
-class AttackService:
-    """Handling battle"""
-    def __init__(self, attack_army, defence_army):
+class ArmyAttackService:
+    """
+    Handling battle logic
+    """
+    def __init__(self, attack_army):
         self.attack_army = attack_army
-        self.defence_army = defence_army
+        self.defence_army = None
         self.num_of_attacks = 0
+        self.dead = False
 
         self.lucky_value = 10#random.randint(1, 15)
         # needs to be (range(1, 101), 100)
@@ -27,7 +30,13 @@ class AttackService:
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
 
+    def get_defence_army(self, army_id):
+        """Retriving defence army"""
+        self.defence_army = Army.query.filter_by(id=army_id).first()
+        return self.defence_army
+
     def create(self):
+        """Ddding battle to DB"""
         battle = Battle(attack_army_id=self.attack_army.id,
                         defence_army_id=self.defence_army.id,
                         attack_army_name=self.attack_army.name,
@@ -36,10 +45,12 @@ class AttackService:
                         num_of_attacks=self.num_of_attacks,
                         )
         DB.session.add(battle)
+        print("{} battle started".format(battle))
         # not sure how to handle session *(READ)*
         return battle
 
     def attack(self, battle):
+        """Determining if attack was succesfull"""
         if battle.num_of_attacks >= self.attack_army.number_squads:
             return jsonify({"error": "your reched the max num of attacks"}), 400
 
@@ -48,7 +59,7 @@ class AttackService:
             attack_damage = round(self.attack_army.number_squads / self.num_of_attacks)
             if attack_damage > battle.defence_army_number_squads:
                 attack_damage = battle.defence_army_number_squads
-                die = True
+                self.dead = True
 
             squad_number = battle.defence_army_number_squads - attack_damage
             DB.session.query(
@@ -57,23 +68,22 @@ class AttackService:
             battle.change_army_number_squads(self.defence_army)
             DB.session.commit()
 
-            # triggering webhooks for battle
-            self._trigger_webhooks(die)
-
-            redirect_url = self._build_url_redirect()
-            return redirect_url
+            return self._build_url_redirect()
 
         return 'try_again'
 
-    def _trigger_webhooks(self, die=False):
+    def trigger_webhooks(self):
+        """Triggering webhooks"""
         webhook_service = WebhookService()
 
         # triggering army.update webhook
-        webhook_service.create_army_update_webhook(self.defence_army, self.attack_army)
+        webhook_service.create_army_update_webhook(self.defence_army)
+        webhook_service.create_army_update_webhook(self.attack_army)
 
         # army.leave webhook in case army died
-        if die:
+        if self.dead:
             webhook_service.create_army_leave_webhook(self.defence_army, leave_type='die')
 
     def _build_url_redirect(self):
+        """Not sure if this is needed ???"""
         return "{}_strategy".format(self.attack_army.name)

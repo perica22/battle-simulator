@@ -2,17 +2,14 @@
 import json
 import time
 
-from flask import request, jsonify, make_response, redirect, url_for
+from flask import request, jsonify, make_response#, redirect, url_for
 
 from app import APP
-from app import DB
 
-from app.server.models import Army
-from app.server.response import ResponseCreate
-from app.server.validation import validate_army_create
-from app.server.webhooks import WebhookService
-from app.server.attack_service import AttackService
-from app.server.utils import calculate_reload_time, validate_army_access_token
+from .attack_service import ArmyAttackService
+from .join_service import ArmyJoinService
+from .utils import calculate_reload_time, validate_army_access_token
+from .webhooks import WebhookService
 
 
 
@@ -22,31 +19,21 @@ def join(**kwargs):
     """
     Join army route
     """
-    webhook_service = WebhookService()
-    response_create = ResponseCreate()
     request_json = request.get_json()
+    access_token = request.args.get('accessToken')
+    join_service = ArmyJoinService(access_token, request_json)
 
-    # Army validation
-    errors = validate_army_create(request_json)
+    army, errors = join_service.create()
     if errors:
-        return "you have an error: {}".format(errors)
+        return jsonify({"errors": errors}), 400
 
-    # TODO: add validation in case army.name value is not unique
-    # and possibl yremove session
-    army = Army(name=request_json['name'],
-                number_squads=request_json['number_squads'],
-                webhook_url=request_json['webhook_url'])
-    DB.session.add(army)
-    DB.session.commit()
+    join_service.trigger_webhook(army)
 
-    # triggering army.join webhook
-    webhook_service.create_army_join_webhook(army)
-
-    result = response_create.create_single_army_response(army)
+    result = join_service.create_join_response(army)
 
     response = make_response(json.dumps(result), 200)
     response.mimetype = "application/json"
-
+    print("{} joined the game".format(army.name))
     time.sleep(kwargs['reload_time'])
     return response
 
@@ -58,12 +45,13 @@ def attack(attack_army, army_id, **kwargs):
     """
     Attack army route
     """
+    attack_service = ArmyAttackService(attack_army)
+
     # check if army exists
-    defence_army = Army.query.filter_by(id=army_id).first()
+    defence_army = attack_service.get_defence_army(army_id)
     if defence_army is None:
         return jsonify({"error": "army not found"}), 404
 
-    attack_service = AttackService(attack_army, defence_army)
     # saving battle in the db
     battle = attack_service.create()
 
@@ -72,8 +60,12 @@ def attack(attack_army, army_id, **kwargs):
         with attack_service:
             response = attack_service.attack(battle)
             if response != 'try_again':
+                # triggering webhooks for battle
+                attack_service.trigger_webhooks()
+                print("{} attacked successfully".format(attack_army.name))
                 time.sleep(kwargs['reload_time'])
-                return redirect(url_for(response))
+                return 'success'
+                #return redirect(url_for(response))
 
     return "this is the attack route, you can begin your attack"
 
