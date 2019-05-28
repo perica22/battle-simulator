@@ -24,6 +24,7 @@ class Army(DB.Model):
     access_token = DB.Column(DB.String(120), default=lambda: generate_hash(), unique=True)
     status = DB.Column(DB.String(64), default='alive')
     join_type = DB.Column(DB.String(64), default='new')
+    in_battle = DB.Column(DB.Integer, default=0)
 
     def __repr__(self):
         return '<Army {}>'.format(self.name)
@@ -35,6 +36,16 @@ class Army(DB.Model):
     def join_type_update(self):
         """changing join_type of army"""
         self.join_type = 'returned'
+
+    def is_in_active_battle(self):
+        if self.in_battle == 0:
+            self.in_battle = 1 
+        else:
+            self.in_battle = 0
+        #DB.session.commit()
+
+    def set_defence_army_number_squads(self, damage):
+        self.number_squads = self.number_squads - damage
 
 class Battle(DB.Model):
     """

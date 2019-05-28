@@ -2,6 +2,7 @@
 help functions for server
 """
 import math
+
 from functools import wraps
 
 from flask import request, jsonify
@@ -20,7 +21,7 @@ def calculate_reload_time(function):
             number_squads = args[0].number_squads
         except IndexError:
             number_squads = request.get_json()['number_squads']
-        kwargs['reload_time'] = math.floor(number_squads / 10 *5)
+        kwargs['reload_time'] = math.floor(number_squads / 20)
         return function(*args, **kwargs)
     return decorated
 

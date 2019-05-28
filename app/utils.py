@@ -28,7 +28,7 @@ class Client():
         self.access_token = army['accessToken']
         self.id = army['id']
 
-    def army_enemies_set(self, payload):
+    def army_enemie_set(self, payload):
         enemie = {}
         enemie['id'] = payload['armyId']
         enemie['number_squads'] = payload['squadsCount']
@@ -36,10 +36,22 @@ class Client():
 
         self.enemies.append(enemie)
 
+    def army_enemies_set(self, payload):
+        for army in payload:
+            enemie = {}
+            enemie['id'] = army['armyId']
+            enemie['number_squads'] = army['squadsCount']
+            enemie['type_of_join'] = army['TypeOfJoin']
+
+            self.enemies.append(enemie)
+
     def army_enemies_leave(self, payload):
         for army in self.enemies:
             if army['id'] == payload['armyId']:
-                army['type_of_leave'] = payload['TypeOfLeave']
+                #army['type_of_leave'] = payload['TypeOfLeave']
+                number = self.enemies.index(army)
+                self.enemies.pop(number)
+                break
 
     def army_enemies_update(self, payload):
         for army in self.enemies:
@@ -51,11 +63,9 @@ class Client():
         self.rank_rate = payload['rankRate']
         self.number_squads = payload['squadsCount']
 
-    def battle_status(self):
-        self.join_battle = True if self.join_battle == False else False
 
-
-CLIENT_2 = Client('client2', 10, "http://127.0.0.1:5000/client2/webhook")
-CLIENT_3 = Client('client3', 15, "http://127.0.0.1:5000/client3/webhook")
-
-#army_to_attack = random.choice([army['number_squads'] for army in joined_armys])
+CLIENT_1 = Client('client1', 70, "http://127.0.0.1:5000/client1/webhook")
+CLIENT_2 = Client('client2', 90, "http://127.0.0.1:5000/client2/webhook")
+CLIENT_3 = Client('client3', 80, "http://127.0.0.1:5000/client3/webhook")
+CLIENT_4 = Client('client4', 60, "http://127.0.0.1:5000/client4/webhook")
+CLIENT_5 = Client('client5', 88, "http://127.0.0.1:5000/client5/webhook")

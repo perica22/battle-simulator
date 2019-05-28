@@ -1,4 +1,6 @@
 """Handling army join """
+import threading
+
 from app import DB
 
 from .models import Army
@@ -32,12 +34,20 @@ class ArmyJoinService:
                         webhook_url=self.payload['webhook_url'])
             DB.session.add(army)
             DB.session.commit()
+            self._trigger_webhook(army)
 
         return army, None
 
-    def trigger_webhook(self, army):
+    def _trigger_webhook(self, army):
         """Triggering webhook"""
+        '''x = threading.Thread(
+            target=self.webhook_service.create_army_join_webhook, args=(army,))
+        x.start()
+        y = threading.Thread(
+            target=self.webhook_service.create_webhook_with_already_joined_armies, args=(army,))
+        y.start()'''
         self.webhook_service.create_army_join_webhook(army)
+        self.webhook_service.create_webhook_with_already_joined_armies(army)
 
     def create_join_response(self, army):
         """Creating join response"""

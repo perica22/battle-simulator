@@ -1,24 +1,28 @@
 import requests
 import json
+import time
 
+"""
+CHECK THE WHILE LOOP IN CLINETS SECTION 
+PROB THE REASON IT IS NOT WORKING 
+"""
 
 headers = {"Content-Type": "application/json"}
 
-data = {
-        "name":"perica2",
-        "number_squads": 50,
-        "webhook_url": "http://127.0.0.1:5000/client2/webhook"
-    }
-url ='http://127.0.0.1:5000/starwars/api/join'
+url ='http://127.0.0.1:5000/client1'
+response = requests.post(url, data=json.dumps({}), headers=headers)
 
-response = requests.post(url, data=json.dumps(data), headers=headers)
+time.sleep(3)
+url ='http://127.0.0.1:5000/client2'
+response = requests.post(url, data=json.dumps({}), headers=headers)
 
-if response.status_code == 200:
-	data = {
-	        "name":"perica3",
-	        "number_squads": 100,
-	        "webhook_url": "http://127.0.0.1:5000/client3/webhook"
-	    }
-	url ='http://127.0.0.1:5000/starwars/api/join'
+time.sleep(3)
+url ='http://127.0.0.1:5000/client3'
+response = requests.post(url, data=json.dumps({}), headers=headers)
 
-	response = requests.post(url, data=json.dumps(data), headers=headers)
+time.sleep(2)
+url ='http://127.0.0.1:5000/client4'
+response = requests.post(url, data=json.dumps({}), headers=headers)
+
+url ='http://127.0.0.1:5000/client5'
+response = requests.post(url, data=json.dumps({}), headers=headers)

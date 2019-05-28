@@ -2,7 +2,7 @@
 import json
 import time
 
-from flask import request, jsonify, make_response#, redirect, url_for
+from flask import request, jsonify, make_response
 
 from app import APP
 
@@ -26,15 +26,15 @@ def join(**kwargs):
     army, errors = join_service.create()
     if errors:
         return jsonify({"errors": errors}), 400
-
-    join_service.trigger_webhook(army)
+    print("{} joined the game".format(army.name))
 
     result = join_service.create_join_response(army)
 
     response = make_response(json.dumps(result), 200)
     response.mimetype = "application/json"
-    print("{} joined the game".format(army.name))
+    #join_service.trigger_webhook(army)
     time.sleep(kwargs['reload_time'])
+
     return response
 
 
@@ -49,8 +49,12 @@ def attack(attack_army, army_id, **kwargs):
 
     # check if army exists
     defence_army = attack_service.get_defence_army(army_id)
-    if defence_army is None:
-        return jsonify({"error": "army not found"}), 404
+    if defence_army is None or defence_army.status != 'alive':
+        return jsonify({"error": "army not found or dead"}), 404
+    
+    #print('----------', defence_army.__dict__)
+    if defence_army.in_battle == 1:
+        return jsonify({"error": "army in active battle"}), 400
 
     # saving battle in the db
     battle = attack_service.create()
@@ -59,13 +63,13 @@ def attack(attack_army, army_id, **kwargs):
     for _ in range(attack_army.number_squads):
         with attack_service:
             response = attack_service.attack(battle)
+            time.sleep(kwargs['reload_time'])
             if response != 'try_again':
                 # triggering webhooks for battle
-                attack_service.trigger_webhooks()
                 print("{} attacked successfully".format(attack_army.name))
-                time.sleep(kwargs['reload_time'])
+                attack_service.trigger_webhooks()
+
                 return 'success'
-                #return redirect(url_for(response))
 
     return "this is the attack route, you can begin your attack"
 
