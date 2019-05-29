@@ -26,14 +26,11 @@ class WebhookService:
         self.headers["Webhook-Topic"] = "army.join"
         armies = Army.query.filter(Army.status == 'alive', Army.id != payload.id).all()
         webhook_payload = self.response_create.create_army_join_webhook_response(payload)
-
-        webhook_urls = [army.webhook_url for army in armies]
-        for url in webhook_urls:
-            print("{}; army.join webhook sent to {}".format(webhook_payload, url))
-            '''l = threading.Thread(
-                target=self._send_request, args=(url, webhook_payload))
-            l.start()'''
-            self._send_request(url, webhook_payload)
+        '''
+        l = threading.Thread(
+            target=self._send_request, args=(url, webhook_payload))
+        l.start()'''
+        self._send_requests(armies, webhook_payload)
 
     def create_army_leave_webhook(self, payload, leave_type):
         """Logic for creating army.leave webhook"""
@@ -42,34 +39,26 @@ class WebhookService:
         armies = Army.query.filter(Army.status == 'alive', Army.id != payload.id).all()
         webhook_payload = self.response_create.create_army_leave_webhook_response(
             payload, leave_type)
-
-        webhook_urls = [army.webhook_url for army in armies]
-        for url in webhook_urls:
-            print("{}; army.leave webhook sent to {}".format(webhook_payload, url))
-            '''k = threading.Thread(
-                target=self._send_request, args=(url, webhook_payload))
-            k.start()'''
-            self._send_request(url, webhook_payload)
+        '''k = threading.Thread(
+            target=self._send_request, args=(url, webhook_payload))
+        k.start()'''
+        self._send_requests(armies, webhook_payload)
 
     def create_army_update_webhook(self, army):
         """Logic for creating army.update webhook"""
         self.headers["Webhook-Topic"] = "army.update"
 
         # determining rank-rate of army
+        #armies = DB.session.query(Army).order_by(Army.number_squads.desc()).all()
         armies = Army.query.order_by(Army.number_squads.desc()).all()
         army.rankRate = armies.index(army) + 1
 
-        webhook_payload = self.response_create.create_army_update_webhook_response(army)
-        #print(armies)
-        #print(armies[::-1])
-        url = army.webhook_url
-        print("{}; army.update webhook sent to {}".format(webhook_payload, url))
-        for army.url in armies[::-1]:
-            '''p = threading.Thread(
-                    target=self._send_request, args=(url, webhook_payload))
-            p.start()
+        webhook_payload = self.response_create.create_army_update_webhook_response(army)   
+        '''p = threading.Thread(
+                target=self._send_request, args=(url, webhook_payload))
+        p.start()
         '''
-        self._send_request(url, webhook_payload)
+        self._send_requests(armies, webhook_payload)
 
     def create_webhook_with_already_joined_armies(self, army):
         """
@@ -78,19 +67,26 @@ class WebhookService:
         """
         self.headers["Webhook-Topic"] = "army.join"
         armies = Army.query.filter(Army.status == 'alive', Army.id != army.id).all()
-
         webhook_payload = self.response_create.webhook_response_with_already_joined_armies(armies)
 
         url = army.webhook_url
         print("{}; army.join webhook sent to {}".format(webhook_payload, url))
         '''
         b = threading.Thread(
-                target=self._send_request, args=(url, webhook_payload))
-        b.start()
-        '''
+            target=self._send_request, args=(url, webhook_payload))
+        b.start()'''
         self._send_request(url, webhook_payload)
 
+    def _send_requests(self, armies, payload):
+        for army in armies[::-1]:
+            print("{}; {} webhook sent to {}".format(
+                    payload, self.headers["Webhook-Topic"], army.webhook_url))
+            response = requests.post(
+                army.webhook_url, data=json.dumps(payload), headers=self.headers)
+
     def _send_request(self, url, payload):
+        print("{}; {} webhook sent to {}".format(
+                    payload, self.headers["Webhook-Topic"], url))
         response = requests.post(
             url, data=json.dumps(payload), headers=self.headers)
         #if response.status_code != 200:

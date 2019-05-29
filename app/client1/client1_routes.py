@@ -76,7 +76,7 @@ def client1_strategy():
     """
     if CLIENT_1.enemies and CLIENT_1.access_token:
         army_to_attack = random.choice(
-            [army for army in CLIENT_1.enemies if army['number_squads'] > 0])
+            [army for army in CLIENT_1.enemies if army['number_squads'] > 0])# last if probably not needed
         print('-----------', army_to_attack)
         #redirect for attack
         data = {"name":CLIENT_1.name,

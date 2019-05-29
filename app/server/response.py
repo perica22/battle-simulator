@@ -66,8 +66,8 @@ class ResponseCreate:
         """Creating list of armies for army.join webhook response"""
         obj = []
 
-        response = {}
         for army in armies:
+            response = {}
             response['armyId'] = army.id
             response['squadsCount'] = army.number_squads
             response['TypeOfJoin'] = army.join_type

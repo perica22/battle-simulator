@@ -32,9 +32,8 @@ def join(**kwargs):
 
     response = make_response(json.dumps(result), 200)
     response.mimetype = "application/json"
-    #join_service.trigger_webhook(army)
-    time.sleep(kwargs['reload_time'])
 
+    time.sleep(kwargs['reload_time'])
     return response
 
 
@@ -52,7 +51,6 @@ def attack(attack_army, army_id, **kwargs):
     if defence_army is None or defence_army.status != 'alive':
         return jsonify({"error": "army not found or dead"}), 404
     
-    #print('----------', defence_army.__dict__)
     if defence_army.in_battle == 1:
         return jsonify({"error": "army in active battle"}), 400
 
@@ -62,16 +60,12 @@ def attack(attack_army, army_id, **kwargs):
     # repeting the battle until success or max num of retries is reached
     for _ in range(attack_army.number_squads):
         with attack_service:
-            response = attack_service.attack(battle)
+            response = attack_service.attack()
             time.sleep(kwargs['reload_time'])
             if response != 'try_again':
-                # triggering webhooks for battle
                 print("{} attacked successfully".format(attack_army.name))
-                attack_service.trigger_webhooks()
 
                 return 'success'
-
-    return "this is the attack route, you can begin your attack"
 
 
 @APP.route('/starwars/api/leave', methods=['POST'])

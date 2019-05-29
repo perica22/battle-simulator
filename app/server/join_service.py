@@ -29,23 +29,19 @@ class ArmyJoinService:
             errors = self._validate_army_create()
             if errors:
                 return None, errors
-            army = Army(name=self.payload['name'],
-                        number_squads=self.payload['number_squads'],
-                        webhook_url=self.payload['webhook_url'])
-            DB.session.add(army)
-            DB.session.commit()
+            with DB.session.no_autoflush:
+                army = Army(name=self.payload['name'],
+                            number_squads=self.payload['number_squads'],
+                            webhook_url=self.payload['webhook_url'])
+                DB.session.add(army)
+                DB.session.commit()
+
             self._trigger_webhook(army)
 
         return army, None
 
     def _trigger_webhook(self, army):
         """Triggering webhook"""
-        '''x = threading.Thread(
-            target=self.webhook_service.create_army_join_webhook, args=(army,))
-        x.start()
-        y = threading.Thread(
-            target=self.webhook_service.create_webhook_with_already_joined_armies, args=(army,))
-        y.start()'''
         self.webhook_service.create_army_join_webhook(army)
         self.webhook_service.create_webhook_with_already_joined_armies(army)
 

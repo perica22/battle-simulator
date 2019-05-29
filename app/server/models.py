@@ -37,12 +37,11 @@ class Army(DB.Model):
         """changing join_type of army"""
         self.join_type = 'returned'
 
-    def is_in_active_battle(self):
-        if self.in_battle == 0:
-            self.in_battle = 1 
-        else:
+    def is_in_active_battle(self, damage=None):
+        if self.in_battle == 1:
             self.in_battle = 0
-        #DB.session.commit()
+        else:
+            self.in_battle = 1
 
     def set_defence_army_number_squads(self, damage):
         self.number_squads = self.number_squads - damage

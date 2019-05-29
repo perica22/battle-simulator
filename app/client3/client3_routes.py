@@ -68,7 +68,7 @@ def client3_strategy():
     Makes a call to attack
     """
     if CLIENT_3.enemies and CLIENT_3.access_token:
-        armies_to_attack = [army for army in CLIENT_2.enemies if army['number_squads'] > 0]
+        armies_to_attack = [army for army in CLIENT_3.enemies if army['number_squads'] > 0]
         army_to_attack = max_function(armies_to_attack)
 
         #redirect for attack
