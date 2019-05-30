@@ -19,7 +19,7 @@ class ArmyAttackService:
         self.num_of_attacks = 0
         self.dead = False
 
-        self.lucky_value = random.randint(1, 101)
+        self.lucky_value = random.randint(1, 5)
 
     def __enter__(self):
         self.num_of_attacks += 1
@@ -58,7 +58,7 @@ class ArmyAttackService:
             self.attack_army.is_in_active_battle()
             return jsonify({"error": "your reched the max num of attacks"}), 400
 
-        attack_value = random.randint(1, 101)
+        attack_value = random.randint(1, 5)
         print("lucky_value is {} and {} strikes with {}".format(
             self.lucky_value, self.attack_army.name.upper(), attack_value))
 

@@ -34,23 +34,23 @@ def client5_webhook():
     if request.headers['Webhook-Topic'] == 'army.join':
         if 'army' in request_json:
             CLIENT_5.army_enemie_set(request_json['army'])
-            if CLIENT_5.status == 'alive' and CLIENT_5.enemies:
+            if CLIENT_5.status == 'alive':
                 client5_strategy()
             return '', 200
         else:
             CLIENT_5.army_enemies_set(request_json['armies'])
-            if CLIENT_5.status == 'alive' and CLIENT_5.enemies:
+            if CLIENT_5.status == 'alive':
                 client5_strategy()            
             return '', 200
     elif request.headers['Webhook-Topic'] == 'army.update':
         if request_json['army']['armyId'] == CLIENT_5.army_id:
             CLIENT_5.self_update(request_json['army'])
-            if CLIENT_5.status == 'alive' and CLIENT_5.enemies:
+            if CLIENT_5.status == 'alive':
                 client5_strategy()
             return '', 200
         else:
             CLIENT_5.army_enemies_update(request_json['army'])
-            if CLIENT_5.status == 'alive' and CLIENT_5.enemies:
+            if CLIENT_5.status == 'alive':
                 client5_strategy()
             return '', 200
     elif request.headers['Webhook-Topic'] == 'army.leave':
