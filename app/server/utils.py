@@ -7,7 +7,7 @@ from functools import wraps
 
 from flask import request, jsonify
 
-from .models import Army #token - for showing DB relations
+from .models import Army
 
 
 

@@ -26,7 +26,6 @@ def join(**kwargs):
     army, errors = join_service.create()
     if errors:
         return jsonify({"errors": errors}), 400
-    print("{} joined the game".format(army.name))
 
     result = join_service.create_join_response(army)
 
@@ -50,9 +49,11 @@ def attack(attack_army, army_id, **kwargs):
     defence_army = attack_service.get_defence_army(army_id)
     if defence_army is None or defence_army.status != 'alive':
         return jsonify({"error": "army not found or dead"}), 404
-    
-    if defence_army.in_battle == 1:
-        return jsonify({"error": "army in active battle"}), 400
+
+    if attack_army.in_battle == 1:
+        return jsonify({"error": "you are already in active battle"}), 400
+    if attack_army.status != 'alive':
+        return jsonify({"error": "only alive armys can attack"}), 400
 
     # saving battle in the db
     battle = attack_service.create()
@@ -60,12 +61,11 @@ def attack(attack_army, army_id, **kwargs):
     # repeting the battle until success or max num of retries is reached
     for _ in range(attack_army.number_squads):
         with attack_service:
-            response = attack_service.attack()
+            response = attack_service.attack(battle)
             time.sleep(kwargs['reload_time'])
             if response != 'try_again':
-                print("{} attacked successfully".format(attack_army.name))
-
                 return 'success'
+    return 'fail'
 
 
 @APP.route('/starwars/api/leave', methods=['POST'])

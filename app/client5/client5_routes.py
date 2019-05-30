@@ -1,9 +1,9 @@
 """
 CLIENT_5 app
 """
-import json, random, requests, time, threading
+import json, random, requests
 
-from flask import request, make_response, redirect, url_for
+from flask import request
 
 from app import APP
 from app.utils import CLIENT_5, HEADERS, JOIN_URL
@@ -22,7 +22,7 @@ def client5():
         CLIENT_5.set_access_token_and_id(army)
         return '', 204
     else:
-        print('-------------nije uspesno-------------')
+        return '', 400
 
 @APP.route('/client5/webhook', methods=['POST'])
 def client5_webhook():
@@ -34,29 +34,24 @@ def client5_webhook():
     if request.headers['Webhook-Topic'] == 'army.join':
         if 'army' in request_json:
             CLIENT_5.army_enemie_set(request_json['army'])
-            #e = threading.Thread(
-            #    target=client1_strategy)
-            #e.start()
-            client5_strategy()
+            if CLIENT_5.status == 'alive':
+                client5_strategy()
             return '', 200
         else:
             CLIENT_5.army_enemies_set(request_json['armies'])
-            #u = threading.Thread(
-            #    target=client1_strategy)
-            #u.start()
-            client5_strategy()            
+            if CLIENT_5.status == 'alive':
+                client5_strategy()            
             return '', 200
     elif request.headers['Webhook-Topic'] == 'army.update':
-        if request_json['army']['armyId'] == CLIENT_5.id:
+        if request_json['army']['armyId'] == CLIENT_5.army_id:
             CLIENT_5.self_update(request_json['army'])
-            client5_strategy()
+            if CLIENT_5.status == 'alive':
+                client5_strategy()
             return '', 200
         else:
             CLIENT_5.army_enemies_update(request_json['army'])
-            #r = threading.Thread(
-            #    target=client1_strategy)
-            #r.start()
-            client5_strategy()
+            if CLIENT_5.status == 'alive':
+                client5_strategy()
             return '', 200
     elif request.headers['Webhook-Topic'] == 'army.leave':
         CLIENT_5.army_enemies_leave(request_json['army'])
@@ -70,7 +65,7 @@ def client5_strategy():
     if CLIENT_5.enemies and CLIENT_5.access_token:
         army_to_attack = random.choice(
             [army for army in CLIENT_5.enemies if army['number_squads'] > 0])
-        
+
         #redirect for attack
         data = {"name":CLIENT_5.name,
                 "number_squads": CLIENT_5.number_squads}

@@ -14,10 +14,9 @@ class Client():
         self.name = name
         self.number_squads = number_squads
         self.webhook_url = webhook_url
+        self.status = 'alive'
         self.access_token = None
-        self.id = None
-        self.rank_rate = None
-        self.join_battle = False
+        self.army_id = None
         self.enemies = []
 
     def __repr__(self):
@@ -26,9 +25,10 @@ class Client():
     def set_access_token_and_id(self, army):
         """Setting access_token after server response"""
         self.access_token = army['accessToken']
-        self.id = army['id']
+        self.army_id = army['id']
 
     def army_enemie_set(self, payload):
+        '''Adding new enemie after army.join webhhok is triggered'''
         enemie = {}
         enemie['id'] = payload['armyId']
         enemie['number_squads'] = payload['squadsCount']
@@ -37,6 +37,7 @@ class Client():
         self.enemies.append(enemie)
 
     def army_enemies_set(self, payload):
+        '''Adding all enemies after army.join webhhok is triggered'''
         for army in payload:
             enemie = {}
             enemie['id'] = army['armyId']
@@ -46,26 +47,28 @@ class Client():
             self.enemies.append(enemie)
 
     def army_enemies_leave(self, payload):
+        '''Removing enemie after army.leave webhhok is triggered'''
         for army in self.enemies:
             if army['id'] == payload['armyId']:
-                #army['type_of_leave'] = payload['TypeOfLeave']
                 number = self.enemies.index(army)
                 self.enemies.pop(number)
                 break
 
     def army_enemies_update(self, payload):
+        '''Updating enemie after army.update webhhok is triggered'''
         for army in self.enemies:
             if army['id'] == payload['armyId']:
                 army['number_squads'] = payload['squadsCount']
-                army['rank_rate'] = payload['rankRate']
 
     def self_update(self, payload):
-        self.rank_rate = payload['rankRate']
+        '''Self update after army.update webhook is triggered'''
+        if payload['squadsCount'] == 0:
+            self.status = 'dead'
         self.number_squads = payload['squadsCount']
 
 
-CLIENT_1 = Client('client1', 70, "http://127.0.0.1:5000/client1/webhook")
-CLIENT_2 = Client('client2', 90, "http://127.0.0.1:5000/client2/webhook")
-CLIENT_3 = Client('client3', 80, "http://127.0.0.1:5000/client3/webhook")
-CLIENT_4 = Client('client4', 60, "http://127.0.0.1:5000/client4/webhook")
-CLIENT_5 = Client('client5', 88, "http://127.0.0.1:5000/client5/webhook")
+CLIENT_1 = Client('client1', 45, "http://127.0.0.1:5000/client1/webhook")
+CLIENT_2 = Client('client2', 89, "http://127.0.0.1:5000/client2/webhook")
+CLIENT_3 = Client('client3', 98, "http://127.0.0.1:5000/client3/webhook")
+CLIENT_4 = Client('client4', 36, "http://127.0.0.1:5000/client4/webhook")
+CLIENT_5 = Client('client5', 65, "http://127.0.0.1:5000/client5/webhook")

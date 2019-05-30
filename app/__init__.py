@@ -17,7 +17,6 @@ BASEDIR = os.path.abspath(os.path.dirname(__file__))
 APP.config.from_object(Config)
 DB = SQLAlchemy(APP)
 MIGRATE = Migrate(APP, DB)
-APP.debug = True
 
 
 from app.server import routes

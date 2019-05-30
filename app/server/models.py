@@ -30,21 +30,24 @@ class Army(DB.Model):
         return '<Army {}>'.format(self.name)
 
     def leave(self, leave_type):
-        """changing status of army"""
+        """Changing leave status of army"""
         self.status = leave_type
 
     def join_type_update(self):
-        """changing join_type of army"""
+        """Changing join_type of army"""
         self.join_type = 'returned'
 
-    def is_in_active_battle(self, damage=None):
+    def is_in_active_battle(self):
+        '''Changing battle status for attacking army'''
         if self.in_battle == 1:
             self.in_battle = 0
         else:
             self.in_battle = 1
 
     def set_defence_army_number_squads(self, damage):
+        '''Changing number of squads for defted army'''
         self.number_squads = self.number_squads - damage
+
 
 class Battle(DB.Model):
     """
@@ -53,17 +56,17 @@ class Battle(DB.Model):
     id = DB.Column(DB.Integer, primary_key=True, autoincrement=True)
     attack_army_id = DB.Column(DB.Integer)
     attack_army_name = DB.Column(DB.String(64))
+    attack_army_number_squads = DB.Column(DB.Integer)
     defence_army_id = DB.Column(DB.Integer)
     defence_army_name = DB.Column(DB.String(64))
     defence_army_number_squads = DB.Column(DB.Integer)
-    attack_army_number_squads = DB.Column(DB.Integer)
+    defence_army_numer_squads_after = DB.Column(DB.Integer)
     num_of_attacks = DB.Column(DB.Integer)
 
     def __repr__(self):
         return '<Battle {} - {}'.format(self.attack_army_name, self.defence_army_name)
 
-    def change_army_number_squads(self, defense_army):
-        """changing number of squads for army"""
-        defense_army.number_squads = self.defence_army_number_squads
-        if defense_army.number_squads == 0:
-            defense_army.status = 'dead'
+    def after_battle_update(self, num_of_attacks, damage):
+        '''Updating battle data after successfull battle'''
+        self.num_of_attacks = num_of_attacks
+        self.defence_army_numer_squads_after = self.defence_army_number_squads - damage

@@ -1,9 +1,9 @@
 """
 CLIENT_2 app
 """
-import json, random, requests, time, threading
+import json, random, requests
 
-from flask import request, make_response, redirect, url_for
+from flask import request
 
 from app import APP
 from app.utils import CLIENT_2, HEADERS, JOIN_URL
@@ -22,7 +22,7 @@ def client2():
         CLIENT_2.set_access_token_and_id(army)
         return '', 204
     else:
-       print('-------------nije uspesno-------------')
+        return '', 400
 
 @APP.route('/client2/webhook', methods=['POST'])
 def client2_webhook():
@@ -34,29 +34,23 @@ def client2_webhook():
     if request.headers['Webhook-Topic'] == 'army.join':
         if 'army' in request_json:
             CLIENT_2.army_enemie_set(request_json['army'])
-            #q = threading.Thread(
-            #    target=client2_strategy)
-            #q.start()
-            client2_strategy()
+            if CLIENT_2.status == 'alive':
+                client2_strategy()
             return '', 200
         else:
             CLIENT_2.army_enemies_set(request_json['armies'])
-            #t = threading.Thread(
-            #    target=client2_strategy)
-            #t.start()
-            client2_strategy()
+            if CLIENT_2.status == 'alive':
+                client2_strategy()
             return '', 200
     elif request.headers['Webhook-Topic'] == 'army.update':
-        if request_json['army']['armyId'] == CLIENT_2.id:
+        if request_json['army']['armyId'] == CLIENT_2.army_id:
             CLIENT_2.self_update(request_json['army'])
             client2_strategy()
             return '', 200
         else:
             CLIENT_2.army_enemies_update(request_json['army'])
-            #w = threading.Thread(
-            #    target=client2_strategy)
-            #w.start()
-            client2_strategy()
+            if CLIENT_2.status == 'alive':
+                client2_strategy()
             return '', 200
     elif request.headers['Webhook-Topic'] == 'army.leave':
         CLIENT_2.army_enemies_leave(request_json['army'])

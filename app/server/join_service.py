@@ -1,6 +1,4 @@
 """Handling army join """
-import threading
-
 from app import DB
 
 from .models import Army
@@ -20,7 +18,7 @@ class ArmyJoinService:
         self.payload = payload
 
     def create(self):
-        """Creating or rejoyning armys"""
+        """Creating or rejoining army"""
         if self.access_token:
             army = Army.query.filter_by(
                 access_token=self.access_token).first()
@@ -29,6 +27,7 @@ class ArmyJoinService:
             errors = self._validate_army_create()
             if errors:
                 return None, errors
+            print("{} joined the game".format(self.payload['name'].upper()))
             with DB.session.no_autoflush:
                 army = Army(name=self.payload['name'],
                             number_squads=self.payload['number_squads'],
@@ -57,13 +56,11 @@ class ArmyJoinService:
         errors = []
         if 'name' not in self.payload:
             errors.append('name is required field')
-
         if 'number_squads' not in self.payload:
             errors.append('number_squads is required field')
         else:
             if self.payload['number_squads'] > 100 or self.payload['number_squads'] < 10:
                 errors.append('number_squads must be between 10 and 100')
-
         if 'webhook_url' not in self.payload:
             errors.append('webhook_url is required field')
 

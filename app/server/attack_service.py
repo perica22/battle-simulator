@@ -19,9 +19,7 @@ class ArmyAttackService:
         self.num_of_attacks = 0
         self.dead = False
 
-        self.lucky_value = random.randint(1, 5)
-        # needs to be (range(1, 101), 100)
-        self.array = [1, 2, 3, 4, 5]#random.sample(range(1, 101), 100)#[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        self.lucky_value = random.randint(1, 101)
 
     def __enter__(self):
         self.num_of_attacks += 1
@@ -38,64 +36,69 @@ class ArmyAttackService:
 
     def create(self):
         """Adding battle to DB"""
-        self._set_in_battle_army_status()
+        self.attack_army.is_in_active_battle()
         with DB.session.no_autoflush:
             battle = Battle(attack_army_id=self.attack_army.id,
-                        defence_army_id=self.defence_army.id,
-                        attack_army_name=self.attack_army.name,
-                        defence_army_name=self.defence_army.name,
-                        defence_army_number_squads=self.defence_army.number_squads,
-                        attack_army_number_squads=self.attack_army.number_squads,)
+                            defence_army_id=self.defence_army.id,
+                            attack_army_name=self.attack_army.name,
+                            defence_army_name=self.defence_army.name,
+                            defence_army_number_squads=self.defence_army.number_squads,
+                            attack_army_number_squads=self.attack_army.number_squads,)
             DB.session.add(battle)
             DB.session.commit()
-        print("{} battle started".format(battle))
+        print("{} started".format(str(battle).upper()))
 
         return battle
 
-    def attack(self, battle=None):
-        """Determining if attack was succesfull"""
+    def attack(self, battle):
+        """
+        Determining if attack was succesfull
+        """
         if self.num_of_attacks >= self.attack_army.number_squads:
-            self._set_in_battle_army_status()
+            self.attack_army.is_in_active_battle()
             return jsonify({"error": "your reched the max num of attacks"}), 400
-            
-        attack_value = random.randint(1, 5)
-        print("lucky_value is {} and army strikes with {}".format(self.lucky_value, attack_value))
+
+        attack_value = random.randint(1, 101)
+        print("lucky_value is {} and {} strikes with {}".format(
+            self.lucky_value, self.attack_army.name.upper(), attack_value))
+
         if attack_value == self.lucky_value:
+            print("{} attacked successfully".format(self.attack_army.name.upper()))
+
+            # Calculating attack damage
             attack_damage = round(self.attack_army.number_squads / self.num_of_attacks)
             if attack_damage >= self.defence_army.number_squads:
                 attack_damage = self.defence_army.number_squads
                 self.dead = True
 
+            # Saving changes after succesfull attack
             with DB.session.no_autoflush:
                 DB.session.add(self.defence_army, self.attack_army)
-                self._set_in_battle_army_status()
+                self.attack_army.is_in_active_battle()
                 self.defence_army.set_defence_army_number_squads(attack_damage)
                 DB.session.commit()
-            '''
-            squad_number = battle.defence_army_number_squads - attack_damage
-            session.query(
-                Battle).update({
-                    Battle.defence_army_number_squads: squad_number})
-            battle.change_army_number_squads(self.defence_army)
-            '''
+
+            self._update_battle(battle, attack_damage)
             self._trigger_webhooks()
 
             return 'success'
 
         return 'try_again'
 
+    def _update_battle(self, battle, attack_damage):
+        with DB.session.no_autoflush:
+            DB.session.add(battle)
+            battle.after_battle_update(self.num_of_attacks, attack_damage)
+            DB.session.commit()
+
     def _trigger_webhooks(self):
         """Triggering webhooks"""
         webhook_service = WebhookService()
-        
+
         # army.leave webhook in case army died
         if self.dead:
             webhook_service.create_army_leave_webhook(self.defence_army, leave_type='die')
 
-        # triggering army.update webhook
+        # Triggering army.update webhook
         webhook_service.create_army_update_webhook(self.defence_army)
         webhook_service.create_army_update_webhook(self.attack_army)
-        
-    def _set_in_battle_army_status(self):
-        self.attack_army.is_in_active_battle()
-        self.defence_army.is_in_active_battle()

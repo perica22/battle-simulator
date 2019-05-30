@@ -1,9 +1,9 @@
 """
 CLIENT_3 app
 """
-import json, random, requests, time, threading
+import json, random, requests
 
-from flask import request, make_response, redirect, url_for
+from flask import request
 
 from app import APP
 from app.utils import CLIENT_3, HEADERS, JOIN_URL
@@ -22,7 +22,7 @@ def client3():
         CLIENT_3.set_access_token_and_id(army)
         return '', 204
     else:
-        print('-------------nije uspesno-------------')
+        return '', 400
 
 @APP.route('/client3/webhook', methods=['POST'])
 def client3_webhook():
@@ -34,29 +34,24 @@ def client3_webhook():
     if request.headers['Webhook-Topic'] == 'army.join':
         if 'army' in request_json:
             CLIENT_3.army_enemie_set(request_json['army'])
-            #m = threading.Thread(
-            ##    target=client3_strategy)
-            #m.start()
-            client3_strategy()
+            if CLIENT_3.status == 'alive':
+                client3_strategy()
             return '', 200
         else:
             CLIENT_3.army_enemies_set(request_json['armies'])
-            #i = threading.Thread(
-             #   target=client3_strategy)
-            #i.start()
-            client3_strategy()
+            if CLIENT_3.status == 'alive':
+                client3_strategy()
             return '', 200
     elif request.headers['Webhook-Topic'] == 'army.update':
-        if request_json['army']['armyId'] == CLIENT_3.id:
+        if request_json['army']['armyId'] == CLIENT_3.army_id:
             CLIENT_3.self_update(request_json['army'])
-            client3_strategy()
+            if CLIENT_3.status == 'alive':
+                client3_strategy()
             return '', 200
         else:
             CLIENT_3.army_enemies_update(request_json['army'])
-            #a = threading.Thread(
-            #    target=client3_strategy)
-            #a.start()
-            client3_strategy()
+            if CLIENT_3.status == 'alive':
+                client3_strategy()
             return '', 200
     elif request.headers['Webhook-Topic'] == 'army.leave':
         CLIENT_3.army_enemies_leave(request_json['army'])
@@ -94,4 +89,3 @@ def max_function(armies_list):
             max_value = army['number_squads']
             army_id = army['id']
     return army_id
-        
