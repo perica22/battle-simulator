@@ -2,6 +2,7 @@
 init for app
 """
 import os
+import logging
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -10,6 +11,9 @@ from flask_migrate import Migrate
 from config import Config
 
 
+
+LOG = logging.getLogger('werkzeug')
+LOG.setLevel(logging.ERROR)
 
 APP = Flask(__name__)
 APP.config['SESSION_TYPE'] = 'filesystem'
