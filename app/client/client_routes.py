@@ -1,7 +1,8 @@
 """
 CLIENT app
 """
-import json, requests
+import json
+import requests
 
 from flask import request
 
@@ -22,6 +23,7 @@ def client(client):
             "number_squads": request_json['number_squads'],
             "webhook_url": request_json['webhook_url']}
 
+    # Making instance of Client
     client = Client(request_json['name'],
                     request_json['number_squads'],
                     request_json['client_strategy'])
@@ -49,23 +51,23 @@ def client_webhook(client_name):
     if request.headers['Webhook-Topic'] == 'army.join':
         if 'army' in request_json:
             client.army_enemie_set(request_json['army'])
-            if client.status == 'alive' and client.enemies and client.access_token:
+            if client.status == 'alive' and client.enemies:
                 client.client_strategy()
             return '', 200
         else:
             client.army_enemies_set(request_json['armies'])
-            if client.status == 'alive' and client.enemies and client.access_token:
+            if client.status == 'alive' and client.enemies:
                 client.client_strategy()            
             return '', 200
     elif request.headers['Webhook-Topic'] == 'army.update':
         if request_json['army']['armyId'] == client.army_id:
             client.self_update(request_json['army'])
-            if client.status == 'alive' and client.enemies and client.access_token:
+            if client.status == 'alive' and client.enemies:
                 client.client_strategy()
             return '', 200
         else:
             client.army_enemies_update(request_json['army'])
-            if client.status == 'alive' and client.enemies and client.access_token:
+            if client.status == 'alive' and client.enemies:
                 client.client_strategy()
             return '', 200
     elif request.headers['Webhook-Topic'] == 'army.leave':

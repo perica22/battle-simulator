@@ -71,13 +71,8 @@ class ArmyAttackService:
                 attack_damage = self.defence_army.number_squads
                 self.dead = True
 
-            # Saving changes after succesfull attack
-            with DB.session.no_autoflush:
-                DB.session.add(self.defence_army, self.attack_army)
-                self.attack_army.is_in_active_battle()
-                self.defence_army.set_defence_army_number_squads(attack_damage)
-                DB.session.commit()
-
+            # Saving changes after succesfull attack and triggering webhooks
+            self._update_armies(attack_damage)
             self._update_battle(battle, attack_damage)
             self._trigger_webhooks()
 
@@ -85,7 +80,16 @@ class ArmyAttackService:
 
         return 'try_again'
 
+    def _update_armies(self, attack_damage):
+        '''Updating values in Army table after successull attack'''
+        with DB.session.no_autoflush:
+            DB.session.add(self.defence_army, self.attack_army)
+            self.attack_army.is_in_active_battle()
+            self.defence_army.set_defence_army_number_squads(attack_damage)
+            DB.session.commit()
+
     def _update_battle(self, battle, attack_damage):
+        '''Updating values in Battle table after successull attack'''
         with DB.session.no_autoflush:
             DB.session.add(battle)
             battle.after_battle_update(self.num_of_attacks, attack_damage)

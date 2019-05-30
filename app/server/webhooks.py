@@ -29,6 +29,7 @@ class WebhookService:
 
     def create_army_leave_webhook(self, payload, leave_type):
         """Logic for creating army.leave webhook"""
+        print("* {} left the game *".format(payload.name.upper()))
         self.headers["Webhook-Topic"] = "army.leave"
 
         armies = Army.query.filter(Army.status == 'alive', Army.id != payload.id).all()

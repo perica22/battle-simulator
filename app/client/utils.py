@@ -1,7 +1,9 @@
 """
 help functions for client
 """
-import json, random, requests
+import json
+import random
+import requests
 
 
 
@@ -92,7 +94,7 @@ class Client():
             print('SERVER REPLY:{}'.format(response.json()['error']))
 
     def _min_function(self):
-        '''Searching for army with min squad_number'''
+        '''Retrieving enemy with min squad_number'''
         army_id = None
         min_value = None
         for army in self.enemies:
@@ -105,7 +107,7 @@ class Client():
         return army_id
 
     def _max_function(self):
-        '''Searching for army with max squad_number'''
+        '''Retrieving enemy with max squad_number'''
         army_id = None
         max_value = None
         for army in self.enemies:
