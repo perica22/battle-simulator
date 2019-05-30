@@ -34,23 +34,23 @@ def client5_webhook():
     if request.headers['Webhook-Topic'] == 'army.join':
         if 'army' in request_json:
             CLIENT_5.army_enemie_set(request_json['army'])
-            if CLIENT_5.status == 'alive':
+            if CLIENT_5.status == 'alive' and CLIENT_5.enemies:
                 client5_strategy()
             return '', 200
         else:
             CLIENT_5.army_enemies_set(request_json['armies'])
-            if CLIENT_5.status == 'alive':
+            if CLIENT_5.status == 'alive' and CLIENT_5.enemies:
                 client5_strategy()            
             return '', 200
     elif request.headers['Webhook-Topic'] == 'army.update':
         if request_json['army']['armyId'] == CLIENT_5.army_id:
             CLIENT_5.self_update(request_json['army'])
-            if CLIENT_5.status == 'alive':
+            if CLIENT_5.status == 'alive' and CLIENT_5.enemies:
                 client5_strategy()
             return '', 200
         else:
             CLIENT_5.army_enemies_update(request_json['army'])
-            if CLIENT_5.status == 'alive':
+            if CLIENT_5.status == 'alive' and CLIENT_5.enemies:
                 client5_strategy()
             return '', 200
     elif request.headers['Webhook-Topic'] == 'army.leave':
@@ -64,7 +64,7 @@ def client5_strategy():
     """
     if CLIENT_5.enemies and CLIENT_5.access_token:
         army_to_attack = random.choice(
-            [army for army in CLIENT_5.enemies if army['number_squads'] > 0])
+            [army for army in CLIENT_5.enemies])
 
         #redirect for attack
         data = {"name":CLIENT_5.name,
@@ -74,6 +74,4 @@ def client5_strategy():
 
         response = requests.put(url, data=json.dumps(data), headers=HEADERS)
         if response.status_code == 400:
-            print('{} is WAITING FOR BATTLE TO FINISH'.format(CLIENT_5.name))
-    if not CLIENT_5.enemies:
-        print('NO ARMIES TO ATTACK')
+            print('SERVER REPLY:{}'.format(response.json()['error']))

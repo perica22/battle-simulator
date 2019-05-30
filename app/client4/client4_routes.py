@@ -34,23 +34,23 @@ def client4_webhook():
     if request.headers['Webhook-Topic'] == 'army.join':
         if 'army' in request_json:
             CLIENT_4.army_enemie_set(request_json['army'])
-            if CLIENT_4.status == 'alive':
+            if CLIENT_4.status == 'alive' and CLIENT_4.enemies:
                 client4_strategy()
             return '', 200
         else:
             CLIENT_4.army_enemies_set(request_json['armies'])
-            if CLIENT_4.status == 'alive':
+            if CLIENT_4.status == 'alive' and CLIENT_4.enemies:
                 client4_strategy()            
             return '', 200
     elif request.headers['Webhook-Topic'] == 'army.update':
         if request_json['army']['armyId'] == CLIENT_4.army_id:
             CLIENT_4.self_update(request_json['army'])
-            if CLIENT_4.status == 'alive':
+            if CLIENT_4.status == 'alive' and CLIENT_4.enemies:
                 client4_strategy()
             return '', 200
         else:
             CLIENT_4.army_enemies_update(request_json['army'])
-            if CLIENT_4.status == 'alive':
+            if CLIENT_4.status == 'alive' and CLIENT_4.enemies:
                 client4_strategy()
             return '', 200
     elif request.headers['Webhook-Topic'] == 'army.leave':
@@ -63,8 +63,7 @@ def client4_strategy():
     Makes a call to attack
     """
     if CLIENT_4.enemies and CLIENT_4.access_token:
-        army_to_attack = random.choice(
-            [army for army in CLIENT_4.enemies if army['number_squads'] > 0])
+        army_to_attack = random.choice([army for army in CLIENT_4.enemies])
 
         #redirect for attack
         data = {"name":CLIENT_4.name,
@@ -74,6 +73,4 @@ def client4_strategy():
 
         response = requests.put(url, data=json.dumps(data), headers=HEADERS)
         if response.status_code == 400:
-            print('{} is WAITING FOR BATTLE TO FINISH'.format(CLIENT_4.name))
-    if not CLIENT_4.enemies:
-        print('NO ARMIES TO ATTACK')
+            print('SERVER REPLY:{}'.format(response.json()['error']))

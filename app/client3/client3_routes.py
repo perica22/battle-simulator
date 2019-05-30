@@ -34,23 +34,23 @@ def client3_webhook():
     if request.headers['Webhook-Topic'] == 'army.join':
         if 'army' in request_json:
             CLIENT_3.army_enemie_set(request_json['army'])
-            if CLIENT_3.status == 'alive':
+            if CLIENT_3.status == 'alive' and CLIENT_3.enemies:
                 client3_strategy()
             return '', 200
         else:
             CLIENT_3.army_enemies_set(request_json['armies'])
-            if CLIENT_3.status == 'alive':
+            if CLIENT_3.status == 'alive' and CLIENT_3.enemies:
                 client3_strategy()
             return '', 200
     elif request.headers['Webhook-Topic'] == 'army.update':
         if request_json['army']['armyId'] == CLIENT_3.army_id:
             CLIENT_3.self_update(request_json['army'])
-            if CLIENT_3.status == 'alive':
+            if CLIENT_3.status == 'alive' and CLIENT_3.enemies:
                 client3_strategy()
             return '', 200
         else:
             CLIENT_3.army_enemies_update(request_json['army'])
-            if CLIENT_3.status == 'alive':
+            if CLIENT_3.status == 'alive' and CLIENT_3.enemies:
                 client3_strategy()
             return '', 200
     elif request.headers['Webhook-Topic'] == 'army.leave':
@@ -63,7 +63,7 @@ def client3_strategy():
     Makes a call to attack
     """
     if CLIENT_3.enemies and CLIENT_3.access_token:
-        armies_to_attack = [army for army in CLIENT_3.enemies if army['number_squads'] > 0]
+        armies_to_attack = [army for army in CLIENT_3.enemies]
         army_to_attack = max_function(armies_to_attack)
 
         #redirect for attack
@@ -74,9 +74,7 @@ def client3_strategy():
 
         response = requests.put(url, data=json.dumps(data), headers=HEADERS)
         if response.status_code == 400:
-            print('{} is WAITING FOR BATTLE TO FINISH'.format(CLIENT_3.name))
-    if not CLIENT_3.enemies:
-        print('NO ARMIES TO ATTACK')
+            print('SERVER REPLY:{}'.format(response.json()['error']))
 
 def max_function(armies_list):
     army_id = None
