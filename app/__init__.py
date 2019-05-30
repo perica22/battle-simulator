@@ -24,8 +24,4 @@ MIGRATE = Migrate(APP, DB)
 
 
 from app.server import routes
-from app.client1 import client1_routes
-from app.client2 import client2_routes
-from app.client3 import client3_routes
-from app.client4 import client4_routes
-from app.client5 import client5_routes
+from app.client import client_routes

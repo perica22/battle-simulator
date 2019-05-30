@@ -1,6 +1,10 @@
 """
 help functions for client
 """
+import json, random, requests
+
+
+
 HEADERS = {"Content-Type": "application/json"}
 JOIN_URL = 'http://127.0.0.1:5000/starwars/api/join'
 
@@ -10,10 +14,10 @@ class Client():
     - Hardcoded data for clients
     - Using class instead of sessions
     """
-    def __init__(self, name, number_squads, webhook_url):
+    def __init__(self, name, number_squads, army_strategy):
         self.name = name
         self.number_squads = number_squads
-        self.webhook_url = webhook_url
+        self.army_strategy = army_strategy
         self.status = 'alive'
         self.access_token = None
         self.army_id = None
@@ -66,9 +70,49 @@ class Client():
             self.status = 'dead'
         self.number_squads = payload['squadsCount']
 
+    def client_strategy(self):
+        """
+        Defines the strategy; Makes a call to attack
+        """
+        if self.army_strategy == "max":
+            army_to_attack = self._max_function()
+        elif self.army_strategy == "min":
+            army_to_attack = self._min_function()
+        else:
+            army_to_attack = random.choice([army for army in self.enemies])
 
-CLIENT_1 = Client('client1', 45, "http://127.0.0.1:5000/client1/webhook")
-CLIENT_2 = Client('client2', 89, "http://127.0.0.1:5000/client2/webhook")
-CLIENT_3 = Client('client3', 98, "http://127.0.0.1:5000/client3/webhook")
-CLIENT_4 = Client('client4', 36, "http://127.0.0.1:5000/client4/webhook")
-CLIENT_5 = Client('client5', 65, "http://127.0.0.1:5000/client5/webhook")
+        #redirect for attack
+        data = {"name":self.name,
+                "number_squads": self.number_squads}
+        url = 'http://127.0.0.1:5000/starwars/api/attack/{}?accessToken={}'.format(
+            army_to_attack, self.access_token)
+
+        response = requests.put(url, data=json.dumps(data), headers=HEADERS)
+        if response.status_code == 400:
+            print('SERVER REPLY:{}'.format(response.json()['error']))
+
+    def _min_function(self):
+        '''Searching for army with min squad_number'''
+        army_id = None
+        min_value = None
+        for army in self.enemies:
+            if not min_value:
+                min_value = army['number_squads']
+                army_id = army['id']
+            elif army['number_squads'] < min_value:
+                min_value = army['number_squads']
+                army_id = army['id']
+        return army_id
+
+    def _max_function(self):
+        '''Searching for army with max squad_number'''
+        army_id = None
+        max_value = None
+        for army in self.enemies:
+            if not max_value:
+                max_value = army['number_squads']
+                army_id = army['id']
+            elif army['number_squads'] > max_value:
+                max_value = army['number_squads']
+                army_id = army['id']
+        return army_id
