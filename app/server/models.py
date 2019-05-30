@@ -1,4 +1,4 @@
-"""Application model database"""
+"""Database Model"""
 from uuid import uuid1
 
 from app import DB
