@@ -58,7 +58,7 @@ class WebhookService:
         armies = Army.query.filter(Army.status == 'alive', Army.id != army.id).all()
         webhook_payload = self.response_create.webhook_response_with_already_joined_armies(armies)
 
-        self._send_request(army.webhook_url, webhook_payload)
+        self._send_request(army, webhook_payload)
 
     def _send_requests(self, armies, payload):
         '''
@@ -68,13 +68,13 @@ class WebhookService:
             response = requests.post(
                 army.webhook_url, data=json.dumps(payload), headers=self.headers)
             if response.status_code != 200:
-                print("OPSSS")
+                army.leave(leave_type='left')
 
-    def _send_request(self, url, payload):
+    def _send_request(self, army, payload):
         '''
         Making request for sending webhook
         '''
         response = requests.post(
-            url, data=json.dumps(payload), headers=self.headers)
+            army.webhook_url, data=json.dumps(payload), headers=self.headers)
         if response.status_code != 200:
-            print("OPSSS")
+            army.leave(leave_type='left')
