@@ -67,7 +67,7 @@ class ArmyAttackService:
             print("{} attacked successfully".format(self.attack_army.name.upper()))
 
             # Calculating attack damage
-            attack_damage = round(self.attack_army.number_squads / self.num_of_attacks)
+            attack_damage = self._calculate_damage()
             if attack_damage >= self.defence_army.number_squads:
                 attack_damage = self.defence_army.number_squads
                 self.dead = True
@@ -80,6 +80,10 @@ class ArmyAttackService:
             return 'success'
 
         return 'try_again'
+
+    def _calculate_damage(self):
+        damage = round(self.attack_army.number_squads / self.num_of_attacks)
+        return damage
 
     def _update_armies(self, attack_damage):
         '''Updating values in Army table after successull attack'''
