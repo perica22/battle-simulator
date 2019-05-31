@@ -9,7 +9,7 @@ HEADERS = {"Content-Type": "application/json"}
 
 DATA = {
     "name":"client1",
-    "number_squads": 25,
+    "number_squads": 85,
     "webhook_url": "http://127.0.0.1:5000/client1/webhook",
     "client_strategy": "min"
 }
