@@ -19,7 +19,7 @@ class ArmyAttackService:
         self.num_of_attacks = 0
         self.dead = False
 
-        self.lucky_value = random.randint(1, 10)
+        self.lucky_value = random.randint(1, 100)
 
     def __enter__(self):
         self.num_of_attacks += 1
