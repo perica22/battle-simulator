@@ -11,7 +11,7 @@ HEADERS = {"Content-Type": "application/json"}
 JOIN_URL = 'http://127.0.0.1:5000/starwars/api/join'
 
 
-class Client():
+class Client:
     """
     - Hardcoded data for clients
     - Using class instead of sessions
@@ -84,6 +84,9 @@ class Client():
             army_to_attack = random.choice([army for army in self.enemies])
 
         #redirect for attack
+        self._attack_call(army_to_attack)
+
+    def _attack_call(self, army_to_attack):
         data = {"name":self.name,
                 "number_squads": self.number_squads}
         url = 'http://127.0.0.1:5000/starwars/api/attack/{}?accessToken={}'.format(
@@ -91,7 +94,10 @@ class Client():
 
         response = requests.put(url, data=json.dumps(data), headers=HEADERS)
         if response.status_code == 400:
-            print('SERVER REPLY:{}'.format(response.json()['error']))
+            print('SERVER REPLY:{} - {}'.format(self.name, response.json()['error']))
+        if response.status_code == 429:
+            print('SERVER REPLY:{} - {}'.format(self.name, response.json()['error']))
+            self.client_strategy()
 
     def _min_function(self):
         '''Retrieving enemy with min squad_number'''

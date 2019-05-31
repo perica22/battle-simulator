@@ -63,9 +63,10 @@ def attack(attack_army, army_id, **kwargs):
         with attack_service:
             response = attack_service.attack(battle)
             time.sleep(kwargs['reload_time'])
-            if response != 'try_again':
-                return 'success'
-    return 'fail'
+            if response == 'success':
+                jsonify({"success": "successfull attack"}), 200
+            elif response == 'max num of attacks reached':
+                return jsonify({"error": "your reched the max num of attacks"}), 429
 
 
 @APP.route('/starwars/api/leave', methods=['POST'])

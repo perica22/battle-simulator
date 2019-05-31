@@ -11,7 +11,7 @@ DATA = {
     "name":"client1",
     "number_squads": 25,
     "webhook_url": "http://127.0.0.1:5000/client1/webhook",
-    "client_strategy": "random"
+    "client_strategy": "min"
 }
 URL = 'http://127.0.0.1:5000/client1'
 requests.post(URL, data=json.dumps(DATA), headers=HEADERS)
@@ -40,9 +40,8 @@ DATA = {
     "name":"client4",
     "number_squads": 35,
     "webhook_url": "http://127.0.0.1:5000/client4/webhook",
-    "client_strategy": "min"
+    "client_strategy": "max"
 }
-time.sleep(5)
 URL = 'http://127.0.0.1:5000/client4'
 requests.post(URL, data=json.dumps(DATA), headers=HEADERS)
 
@@ -52,6 +51,6 @@ DATA = {
     "webhook_url": "http://127.0.0.1:5000/client5/webhook",
     "client_strategy": "random"
 }
-time.sleep(8)
+time.sleep(2)
 URL = 'http://127.0.0.1:5000/client5'
 requests.post(URL, data=json.dumps(DATA), headers=HEADERS)
