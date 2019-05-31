@@ -32,7 +32,7 @@ DATA = {
     "webhook_url": "http://127.0.0.1:5000/client3/webhook",
     "client_strategy": "random"
 }
-time.sleep(3)
+
 URL = 'http://127.0.0.1:5000/client3'
 requests.post(URL, data=json.dumps(DATA), headers=HEADERS)
 
