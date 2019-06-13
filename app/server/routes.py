@@ -58,7 +58,7 @@ def attack(attack_army, army_id, **kwargs):
     # saving battle in the db
     battle = attack_service.create()
 
-    # repeting the battle until success or max num of retries is reached
+    # repeating the battle until success or max number of retries is reached
     for _ in range(attack_army.number_squads):
         with attack_service:
             response = attack_service.attack(battle)

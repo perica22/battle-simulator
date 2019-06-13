@@ -11,7 +11,7 @@ from .webhooks import WebhookService
 
 class ArmyAttackService:
     """
-    Handling battle logic
+    Battle logic
     """
     def __init__(self, attack_army):
         self.attack_army = attack_army
@@ -29,13 +29,13 @@ class ArmyAttackService:
         pass
 
     def get_defence_army(self, army_id):
-        """Retriving defence army"""
+        """Retrieving defence army"""
         self.defence_army = Army.query.filter_by(id=army_id).first()
 
         return self.defence_army
 
     def create(self):
-        """Adding battle to DB"""
+        """Saving battle to DB"""
         self.attack_army.is_in_active_battle()
         with DB.session.no_autoflush:
             battle = Battle(attack_army_id=self.attack_army.id,
@@ -52,11 +52,11 @@ class ArmyAttackService:
 
     def attack(self, battle):
         """
-        Determining if attack was succesfull
+        Determining if attack was successful
         """
         if self.num_of_attacks >= self.attack_army.number_squads:
             self.attack_army.is_in_active_battle()
-            DB.session.commit() # or rollback
+            DB.session.commit()
             return 'max num of attacks reached'
 
         attack_value = random.randint(1, 100)
@@ -72,7 +72,7 @@ class ArmyAttackService:
                 attack_damage = self.defence_army.number_squads
                 self.dead = True
 
-            # Saving changes after succesfull attack and triggering webhooks
+            # Saving changes after successful attack and triggering webhooks
             self._update_armies(attack_damage)
             self._update_battle(battle, attack_damage)
             self._trigger_webhooks()
@@ -86,7 +86,7 @@ class ArmyAttackService:
         return damage
 
     def _update_armies(self, attack_damage):
-        '''Updating values in Army table after successull attack'''
+        '''Updating values in Army table after successful attack'''
         with DB.session.no_autoflush:
             DB.session.add(self.defence_army, self.attack_army)
             self.attack_army.is_in_active_battle()
@@ -94,7 +94,7 @@ class ArmyAttackService:
             DB.session.commit()
 
     def _update_battle(self, battle, attack_damage):
-        '''Updating values in Battle table after successull attack'''
+        '''Updating values in Battle table after successful attack'''
         with DB.session.no_autoflush:
             DB.session.add(battle)
             battle.after_battle_update(self.num_of_attacks, attack_damage)

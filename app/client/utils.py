@@ -13,8 +13,7 @@ JOIN_URL = 'http://127.0.0.1:5000/starwars/api/join'
 
 class Client:
     """
-    - Hardcoded data for clients
-    - Using class instead of sessions
+    - Class for generating new client
     """
     def __init__(self, name, number_squads, army_strategy):
         self.name = name
@@ -34,7 +33,7 @@ class Client:
         self.army_id = army['id']
 
     def army_enemie_set(self, payload):
-        '''Adding new enemie after army.join webhhok is triggered'''
+        '''Adding new enemy after army.join webhook is triggered'''
         enemie = {}
         enemie['id'] = payload['armyId']
         enemie['number_squads'] = payload['squadsCount']
@@ -43,7 +42,7 @@ class Client:
         self.enemies.append(enemie)
 
     def army_enemies_set(self, payload):
-        '''Adding all enemies after army.join webhhok is triggered'''
+        '''Adding all enemies after army.join webhook is triggered'''
         for army in payload:
             enemie = {}
             enemie['id'] = army['armyId']
@@ -53,7 +52,7 @@ class Client:
             self.enemies.append(enemie)
 
     def army_enemies_leave(self, payload):
-        '''Removing enemie after army.leave webhhok is triggered'''
+        '''Removing enemy after army.leave webhook is triggered'''
         for army in self.enemies:
             if army['id'] == payload['armyId']:
                 number = self.enemies.index(army)
@@ -61,7 +60,7 @@ class Client:
                 break
 
     def army_enemies_update(self, payload):
-        '''Updating enemie after army.update webhhok is triggered'''
+        '''Updating enemy after army.update webhook is triggered'''
         for army in self.enemies:
             if army['id'] == payload['armyId']:
                 army['number_squads'] = payload['squadsCount']
@@ -83,8 +82,7 @@ class Client:
         else:
             army_to_attack = random.choice([army for army in self.enemies])
 
-        #redirect for attack
-        self._attack_call(army_to_attack)
+        self._attack_call(army_to_attack) # redirect for attack
 
     def _attack_call(self, army_to_attack):
         data = {"name":self.name,

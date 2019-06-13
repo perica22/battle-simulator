@@ -38,14 +38,14 @@ class Army(DB.Model):
         self.join_type = 'returned'
 
     def is_in_active_battle(self):
-        '''Changing battle status for attacking army'''
+        '''Changing battle status for army which is attacking'''
         if self.in_battle == 1:
             self.in_battle = 0
         else:
             self.in_battle = 1
 
     def set_defence_army_number_squads(self, damage):
-        '''Changing number of squads for defted army'''
+        '''Changing number of squads for defeated army'''
         self.number_squads = self.number_squads - damage
 
 
@@ -67,6 +67,6 @@ class Battle(DB.Model):
         return '<Battle {} - {}'.format(self.attack_army_name, self.defence_army_name)
 
     def after_battle_update(self, num_of_attacks, damage):
-        '''Updating battle data after successfull battle'''
+        '''Updating battle data after successful battle'''
         self.num_of_attacks = num_of_attacks
         self.defence_army_numer_squads_after = self.defence_army_number_squads - damage

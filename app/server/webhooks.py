@@ -53,7 +53,7 @@ class WebhookService:
     def create_webhook_with_already_joined_armies(self, army):
         """
         Logic for creating army.join webhook
-        Sending the data of all joined armies to army that just joined
+        Sending the data of all joined army to army that just joined
         """
         self.headers["Webhook-Topic"] = "army.join"
         armies = Army.query.filter(Army.status == 'alive', Army.id != army.id).all()
@@ -63,7 +63,7 @@ class WebhookService:
 
     def _send_requests(self, armies, payload):
         '''
-        Making requests for sending webhooks
+        Sending multiple webhooks
         '''
         for army in armies[::-1]:
             response = requests.post(
@@ -73,7 +73,7 @@ class WebhookService:
 
     def _send_request(self, army, payload):
         '''
-        Making request for sending webhook
+        Sending single webhook
         '''
         response = requests.post(
             army.webhook_url, data=json.dumps(payload), headers=self.headers)

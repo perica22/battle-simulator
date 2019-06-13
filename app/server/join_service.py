@@ -18,7 +18,7 @@ class ArmyJoinService:
         self.payload = payload
 
     def create(self):
-        """Creating or rejoining army"""
+        """Creating and joining army"""
         if self.access_token:
             army = Army.query.filter_by(
                 access_token=self.access_token).first()

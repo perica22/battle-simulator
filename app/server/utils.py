@@ -13,7 +13,7 @@ from .models import Army
 
 def calculate_reload_time(function):
     """
-    This is the decorator calculating server reload time
+    Decorator calculating server reload time
     """
     @wraps(function)
     def decorated(*args, **kwargs):
@@ -27,7 +27,7 @@ def calculate_reload_time(function):
 
 def validate_army_access_token(function):
     """
-    This is the decorator checking access token.
+    Decorator checking access token.
     """
     @wraps(function)
     def decorated(**kwargs):
