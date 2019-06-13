@@ -21,7 +21,7 @@ def calculate_reload_time(function):
             number_squads = args[0].number_squads
         except IndexError:
             number_squads = request.get_json()['number_squads']
-        kwargs['reload_time'] = math.floor(number_squads / 20)
+        kwargs['reload_time'] = math.floor(number_squads / 10)
         return function(*args, **kwargs)
     return decorated
 
