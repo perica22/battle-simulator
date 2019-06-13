@@ -92,6 +92,7 @@ class ArmyAttackService:
             self.attack_army.is_in_active_battle()
             self.defence_army.set_defence_army_number_squads(attack_damage)
             DB.session.commit()
+            print("{} has {} squads left".format(self.defence_army.name, self.defence_army.number_squads))
 
     def _update_battle(self, battle, attack_damage):
         '''Updating values in Battle table after successful attack'''
@@ -104,10 +105,10 @@ class ArmyAttackService:
         """Triggering webhooks"""
         webhook_service = WebhookService()
 
+        # Triggering army.update webhook
+        webhook_service.create_army_update_webhook(self.attack_army)
+        webhook_service.create_army_update_webhook(self.defence_army)
+
         # army.leave webhook in case army died
         if self.dead:
             webhook_service.create_army_leave_webhook(self.defence_army, leave_type='die')
-
-        # Triggering army.update webhook
-        webhook_service.create_army_update_webhook(self.defence_army)
-        webhook_service.create_army_update_webhook(self.attack_army)
