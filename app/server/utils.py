@@ -2,7 +2,6 @@
 help functions for server
 """
 import math
-import json
 
 from functools import wraps
 
@@ -22,7 +21,7 @@ def calculate_reload_time(function):
             number_squads = args[0].number_squads
         except IndexError:
             number_squads = request.get_json()['number_squads']
-        kwargs['reload_time'] = math.floor(number_squads / 30)
+        kwargs['reload_time'] = math.floor(number_squads / 10)
         return function(*args, **kwargs)
     return decorated
 
@@ -39,3 +38,16 @@ def validate_army_access_token(function):
             return jsonify({"error": "invalid access_token"}), 404
         return function(army, **kwargs)
     return decorated
+
+class Indenter:
+    """Indenter for some console logs"""
+    def __init__(self):
+        self.level = 1
+    def __enter__(self):
+        self.level += 1
+        return self
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.level -= 1
+    def print(self, text):
+        """printing intented messages to console"""
+        print('     ' * self.level + text)

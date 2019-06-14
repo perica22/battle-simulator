@@ -1,12 +1,10 @@
 """Service for handling battle"""
 import random
 
-from flask import jsonify
-
 from app import DB
 from .models import Battle, Army
 from .webhooks import WebhookService
-
+from .utils import Indenter
 
 
 class ArmyAttackService:
@@ -64,13 +62,17 @@ class ArmyAttackService:
             self.lucky_value, self.attack_army.name.upper(), attack_value))
 
         if attack_value == self.lucky_value:
-            print("{} attacked successfully".format(self.attack_army.name.upper()))
+
+            with Indenter() as indent:
+                indent.print("{} attacked successfully".format(self.attack_army.name.upper()))
 
             # Calculating attack damage
             attack_damage = self._calculate_damage()
             if attack_damage >= self.defence_army.number_squads:
                 attack_damage = self.defence_army.number_squads
                 self.dead = True
+                with Indenter() as indent:
+                    indent.print("** {} is dead **".format(self.defence_army.name.upper()))
 
             # Saving changes after successful attack and triggering webhooks
             self._update_armies(attack_damage)
@@ -82,6 +84,7 @@ class ArmyAttackService:
         return 'try_again'
 
     def _calculate_damage(self):
+        '''Calculating total damage'''
         damage = round(self.attack_army.number_squads / self.num_of_attacks)
         return damage
 
@@ -92,7 +95,9 @@ class ArmyAttackService:
             self.attack_army.is_in_active_battle()
             self.defence_army.set_defence_army_number_squads(attack_damage)
             DB.session.commit()
-            print("{} has {} squads left".format(self.defence_army.name, self.defence_army.number_squads))
+
+        with Indenter() as indent:
+            indent.print("{} has {} squads left".format(self.defence_army.name, self.defence_army.number_squads))
 
     def _update_battle(self, battle, attack_damage):
         '''Updating values in Battle table after successful attack'''

@@ -28,7 +28,7 @@ def client(client):
                     request_json['number_squads'],
                     request_json['client_strategy'])
 
-    global CLIENTS
+    global CLIENTS # global var for keeping track of all joined clients
     CLIENTS.append(client)
 
     response = requests.post(
@@ -45,6 +45,7 @@ def client_webhook(client_name):
     '''
     Route for receiving webhooks 
     '''
+    #finding the right instance of client
     client = [army for army in CLIENTS if army.name == client_name][0]
     request_json = request.get_json()
 

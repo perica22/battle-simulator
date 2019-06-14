@@ -4,7 +4,7 @@ from app import DB
 from .models import Army
 from .webhooks import WebhookService
 from .response import ResponseCreate
-
+from .utils import Indenter
 
 
 class ArmyJoinService:
@@ -27,7 +27,10 @@ class ArmyJoinService:
             errors = self._validate_army_create()
             if errors:
                 return None, errors
-            print("{} joined the game".format(self.payload['name'].upper()))
+
+            with Indenter() as indent:
+                indent.print("{} joined the game".format(self.payload['name'].upper()))
+
             with DB.session.no_autoflush:
                 army = Army(name=self.payload['name'],
                             number_squads=self.payload['number_squads'],

@@ -10,7 +10,6 @@ import requests
 HEADERS = {"Content-Type": "application/json"}
 JOIN_URL = 'http://127.0.0.1:5000/starwars/api/join'
 
-
 class Client:
     """
     - Class for generating new client
@@ -80,11 +79,12 @@ class Client:
         elif self.army_strategy == "min":
             army_to_attack = self._min_function()
         else:
-            army_to_attack = random.choice([army for army in self.enemies])
+            army_to_attack = random.choice([army['id'] for army in self.enemies])
 
         self._attack_call(army_to_attack) # redirect for attack
 
     def _attack_call(self, army_to_attack):
+        '''Making a call to attack'''
         data = {"name":self.name,
                 "number_squads": self.number_squads}
         url = 'http://127.0.0.1:5000/starwars/api/attack/{}?accessToken={}'.format(

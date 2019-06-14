@@ -53,7 +53,7 @@ class WebhookService:
     def create_webhook_with_already_joined_armies(self, army):
         """
         Logic for creating army.join webhook
-        Sending the data of all joined army to army that just joined
+        Sending the data of all joined armies to army that just joined
         """
         self.headers["Webhook-Topic"] = "army.join"
         armies = Army.query.filter(Army.status == 'alive', Army.id != army.id).all()
