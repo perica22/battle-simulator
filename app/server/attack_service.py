@@ -97,7 +97,8 @@ class ArmyAttackService:
             DB.session.commit()
 
         with Indenter() as indent:
-            indent.print("{} has {} squads left".format(self.defence_army.name, self.defence_army.number_squads))
+            indent.print("{} has {} squads left".format(
+                self.defence_army.name.upper(), self.defence_army.number_squads))
 
     def _update_battle(self, battle, attack_damage):
         '''Updating values in Battle table after successful attack'''
