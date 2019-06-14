@@ -44,7 +44,9 @@ class ArmyAttackService:
                             attack_army_number_squads=self.attack_army.number_squads,)
             DB.session.add(battle)
             DB.session.commit()
-        print("{} started".format(str(battle).upper()))
+
+        with Indenter(0) as indent:
+            indent.print("{} started".format(str(battle).upper()))
 
         return battle
 
@@ -58,12 +60,14 @@ class ArmyAttackService:
             return 'max num of attacks reached'
 
         attack_value = random.randint(1, 100)
-        print("lucky_value is {} and {} strikes with {}".format(
-            self.lucky_value, self.attack_army.name.upper(), attack_value))
+
+        with Indenter(0) as indent:
+            indent.print("lucky_value is {} and {} strikes with {}".format(
+                self.lucky_value, self.attack_army.name.upper(), attack_value))
 
         if attack_value == self.lucky_value:
 
-            with Indenter() as indent:
+            with Indenter(1) as indent:
                 indent.print("{} attacked successfully".format(self.attack_army.name.upper()))
 
             # Calculating attack damage
@@ -71,7 +75,7 @@ class ArmyAttackService:
             if attack_damage >= self.defence_army.number_squads:
                 attack_damage = self.defence_army.number_squads
                 self.dead = True
-                with Indenter() as indent:
+                with Indenter(2) as indent:
                     indent.print("** {} is dead **".format(self.defence_army.name.upper()))
 
             # Saving changes after successful attack and triggering webhooks
@@ -96,7 +100,7 @@ class ArmyAttackService:
             self.defence_army.set_defence_army_number_squads(attack_damage)
             DB.session.commit()
 
-        with Indenter() as indent:
+        with Indenter(1) as indent:
             indent.print("{} has {} squads left".format(
                 self.defence_army.name.upper(), self.defence_army.number_squads))
 

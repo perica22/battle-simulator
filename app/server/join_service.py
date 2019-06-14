@@ -28,7 +28,7 @@ class ArmyJoinService:
             if errors:
                 return None, errors
 
-            with Indenter() as indent:
+            with Indenter(-1) as indent:
                 indent.print("{} joined the game".format(self.payload['name'].upper()))
 
             with DB.session.no_autoflush:

@@ -41,8 +41,8 @@ def validate_army_access_token(function):
 
 class Indenter:
     """Indenter for some console logs"""
-    def __init__(self):
-        self.level = 1
+    def __init__(self, level):
+        self.level = level
     def __enter__(self):
         self.level += 1
         return self
