@@ -19,7 +19,7 @@ APP = Flask(__name__)
 APP.config['SESSION_TYPE'] = 'filesystem'
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
 APP.config.from_object(Config)
-DB = SQLAlchemy(APP)
+DB = SQLAlchemy(APP, session_options={"autoflush": False})
 MIGRATE = Migrate(APP, DB)
 
 

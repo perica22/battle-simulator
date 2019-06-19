@@ -31,12 +31,12 @@ class ArmyJoinService:
             with Indenter(-1) as indent:
                 indent.print("{} joined the game".format(self.payload['name'].upper()))
 
-            with DB.session.no_autoflush:
-                army = Army(name=self.payload['name'],
-                            number_squads=self.payload['number_squads'],
-                            webhook_url=self.payload['webhook_url'])
-                DB.session.add(army)
-                DB.session.commit()
+        
+            army = Army(name=self.payload['name'],
+                        number_squads=self.payload['number_squads'],
+                        webhook_url=self.payload['webhook_url'])
+            DB.session.add(army)
+            DB.session.commit()
 
             self._trigger_webhook(army)
 
