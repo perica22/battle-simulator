@@ -2,10 +2,9 @@
 
 # HOW TO RUN:
     1. Create new empty directory - mkdir projekt
-    2. Initialize git inside of that dir by running git init command
-    3. Take URL of this git repository and run git clone <URL> command
-    4. Change directory to battle_simulator dir by running cd battle_simulator
-    5. Run bash script flask.sh by running . flask.sh command
+    2. Take URL of this git repository and run git clone <URL> command
+    3. Change directory to battle_simulator dir by running cd battle_simulator
+    4. Run bash script flask.sh by running . flask.sh command
 
 
 # ADDITIONAL NOTES:
