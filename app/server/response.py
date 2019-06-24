@@ -1,7 +1,6 @@
 """
 Creating API responses
 """
-from collections import OrderedDict
 
 
 class ResponseCreate:
@@ -28,7 +27,7 @@ class ResponseCreate:
 
         result = self._wrap_response(obj)
 
-        return OrderedDict(result)
+        return result
 
     def create_army_join_webhook_response(self, data):
         """Creating army.join webhook response"""
@@ -36,10 +35,10 @@ class ResponseCreate:
         obj['armyId'] = data.id
         obj['squadsCount'] = data.number_squads
         obj['TypeOfJoin'] = data.join_type
-
+    
         result = self._wrap_response(obj)
 
-        return OrderedDict(result)
+        return result
 
     def create_army_update_webhook_response(self, data):
         """Creating army.update webhook response"""
@@ -50,7 +49,7 @@ class ResponseCreate:
 
         result = self._wrap_response(obj)
 
-        return OrderedDict(result)
+        return result
 
     def create_army_leave_webhook_response(self, data, leave_type):
         """Creating army.leave webhook response"""
@@ -60,20 +59,16 @@ class ResponseCreate:
 
         result = self._wrap_response(obj)
 
-        return OrderedDict(result)
+        return result
 
     def webhook_response_with_already_joined_armies(self, armies):
         """Creating list of armies for army.join webhook response"""
-        obj = []
-
-        for army in armies:
-            response = {}
-            response['armyId'] = army.id
-            response['squadsCount'] = army.number_squads
-            response['TypeOfJoin'] = army.join_type
-            obj.append(response)
-
-        self.key = 'armies'
-        result = self._wrap_response(obj)
+        def to_json(data):
+            return {
+                'armyId': data.id,
+                'squadsCount': data.number_squads,
+                'TypeOfJoin': data.join_type,
+            }
+        result = {'armies': list(map(lambda data: to_json(data), armies))}
 
         return OrderedDict(result)
