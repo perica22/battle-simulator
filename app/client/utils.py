@@ -12,7 +12,12 @@ JOIN_URL = 'http://127.0.0.1:5000/starwars/api/join'
 
 class Client:
     """
-    - Class for generating new client
+    Class for generating new client
+    Args:
+        name: army name
+        number_squads: army number of squads
+        army_strategy: defines which armies this client is going to attck
+                        (based on max, min, random squad_number or enemies)
     """
     def __init__(self, name, number_squads, army_strategy):
         self.name = name
@@ -27,12 +32,20 @@ class Client:
         return '<{} data>'.format(self.name)
 
     def set_access_token_and_id(self, army):
-        """Setting access_token after server response"""
+        """
+        Setting access_token after server response
+        Args:
+            army: data received from API response
+        """
         self.access_token = army['accessToken']
         self.army_id = army['id']
 
     def army_enemie_set(self, payload):
-        '''Adding new enemy after army.join webhook is triggered'''
+        """
+        Adding new enemy after army.join webhook is triggered
+        Args:
+            payload: data received from webhook
+        """
         enemie = {}
         enemie['id'] = payload['armyId']
         enemie['number_squads'] = payload['squadsCount']
@@ -41,7 +54,11 @@ class Client:
         self.enemies.append(enemie)
 
     def army_enemies_set(self, payload):
-        '''Adding all enemies after army.join webhook is triggered'''
+        """
+        Adding all enemies after army.join webhook is triggered
+        Args:
+            payload: data received from webhook
+        """
         for army in payload:
             enemie = {}
             enemie['id'] = army['armyId']
@@ -51,7 +68,11 @@ class Client:
             self.enemies.append(enemie)
 
     def army_enemies_leave(self, payload):
-        '''Removing enemy after army.leave webhook is triggered'''
+        """
+        Removing enemy after army.leave webhook is triggered
+        Args:
+            payload: data received from webhook
+        """
         for army in self.enemies:
             if army['id'] == payload['armyId']:
                 number = self.enemies.index(army)
@@ -59,13 +80,21 @@ class Client:
                 break
 
     def army_enemies_update(self, payload):
-        '''Updating enemy after army.update webhook is triggered'''
+        """
+        Updating enemy after army.update webhook is triggered
+        Args:
+            payload: data received from webhook
+        """
         for army in self.enemies:
             if army['id'] == payload['armyId']:
                 army['number_squads'] = payload['squadsCount']
 
     def self_update(self, payload):
-        '''Self update after army.update webhook is triggered'''
+        """
+        Self update after army.update webhook is triggered
+        Args:
+            payload: data received from webhook
+        """
         if payload['squadsCount'] == 0:
             self.status = 'dead'
         self.number_squads = payload['squadsCount']
@@ -84,7 +113,11 @@ class Client:
         self._attack_call(army_to_attack) # redirect for attack
 
     def _attack_call(self, army_to_attack):
-        '''Making a call to attack'''
+        """
+        Making a call to attack
+        Args:
+            army_to_attack: army that is choosen to be attacked
+        """
         data = {"name":self.name,
                 "number_squads": self.number_squads}
         url = 'http://127.0.0.1:5000/starwars/api/attack/{}?accessToken={}'.format(
@@ -98,7 +131,11 @@ class Client:
             self.client_strategy()
 
     def _min_function(self):
-        '''Retrieving enemy with min squad_number'''
+        """
+        Retrieving enemy with min squad_number
+        Returns:
+            army_id of army with min squad_number
+        """
         army_id = None
         min_value = None
         for army in self.enemies:
@@ -111,7 +148,11 @@ class Client:
         return army_id
 
     def _max_function(self):
-        '''Retrieving enemy with max squad_number'''
+        """
+        Retrieving enemy with max squad_number
+        Returns:
+            army_id of army with max squad_number
+        """
         army_id = None
         max_value = None
         for army in self.enemies:

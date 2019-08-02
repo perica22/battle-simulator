@@ -10,6 +10,9 @@ from .utils import Indenter
 class ArmyJoinService:
     """
     Handling army join
+    Args:
+        access_token: passed in case army is rejoining else None
+        payload: request body on /join route
     """
     def __init__(self, access_token=None, payload=None):
         self.webhook_service = WebhookService()
@@ -18,19 +21,18 @@ class ArmyJoinService:
         self.payload = payload
 
     def create(self):
-        """Creating and joining army"""
+        """
+        Creates the army and calling method for triggering army_join webhooks
+        Returns:
+            army instance once it is successfuly created
+        """
         if self.access_token:
             army = Army.query.filter_by(
                 access_token=self.access_token).first()
             army.join_type_update()
         else:
-            errors = self._validate_army_create()
-            if errors:
-                return None, errors
-
             with Indenter(-1) as indent:
                 indent.print("{} joined the game".format(self.payload['name'].upper()))
-
         
             army = Army(name=self.payload['name'],
                         number_squads=self.payload['number_squads'],
@@ -40,21 +42,30 @@ class ArmyJoinService:
 
             self._trigger_webhook(army)
 
-        return army, None
+        return army
 
     def _trigger_webhook(self, army):
-        """Triggering webhook"""
+        """
+        Triggering webhook with joined army to all previously joined armies
+        Triggering webhook of all previously joined armies to just joined one
+        Args:
+            army: instance of joined army
+        """
         self.webhook_service.create_army_join_webhook(army)
         self.webhook_service.create_webhook_with_already_joined_armies(army)
 
     def create_join_response(self, army):
-        """Creating join response"""
+        """
+        Creating join response
+        """
         response = self.create_response.create_single_army_response(army)
         return response
 
-    def _validate_army_create(self):
+    def validate_army_create(self):
         """
-        Checking required params
+        Validating reuqest body
+        Returns:
+            errors list in case request body not valid
         """
         errors = []
         if 'name' not in self.payload:

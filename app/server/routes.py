@@ -15,7 +15,7 @@ from .webhooks import WebhookService
 
 @APP.route('/starwars/api/join', methods=['POST'])
 @calculate_reload_time
-def join(**kwargs):
+def join(reload_time):
     """
     Join army route
     """
@@ -23,23 +23,25 @@ def join(**kwargs):
     access_token = request.args.get('accessToken')
     join_service = ArmyJoinService(access_token, request_json)
 
-    army, errors = join_service.create()
+    errors = join_service.validate_army_create()
     if errors:
         return jsonify({"errors": errors}), 400
+
+    army = join_service.create()
 
     result = join_service.create_join_response(army)
 
     response = make_response(json.dumps(result), 200)
     response.mimetype = "application/json"
 
-    time.sleep(kwargs['reload_time'])
+    time.sleep(reload_time)
     return response
 
 
 @APP.route('/starwars/api/attack/<int:army_id>', methods=['PUT'])
 @validate_army_access_token
 @calculate_reload_time
-def attack(attack_army, army_id, **kwargs):
+def attack(attack_army, army_id, reload_time):
     """
     Attack army route
     """
@@ -62,7 +64,7 @@ def attack(attack_army, army_id, **kwargs):
     for _ in range(attack_army.number_squads):
         with attack_service:
             response = attack_service.attack(battle)
-            time.sleep(kwargs['reload_time'])
+            time.sleep(reload_time)
             if response == 'success':
                 return 'success'
             elif response == 'max num of attacks reached':
@@ -70,10 +72,11 @@ def attack(attack_army, army_id, **kwargs):
 
     return 'fail'
 
+
 @APP.route('/starwars/api/leave', methods=['POST'])
 @validate_army_access_token
 @calculate_reload_time
-def leave(army, **kwargs):
+def leave(army, reload_time):
     """
     Leave army route
     """
@@ -87,6 +90,6 @@ def leave(army, **kwargs):
     # trigger army.leave webhook
     webhook_service.create_army_leave_webhook(army, leave_type='left')
 
-    time.sleep(kwargs['reload_time'])
+    time.sleep(reload_time)
 
     return jsonify({"success": "you have left the game"}), 200

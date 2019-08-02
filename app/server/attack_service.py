@@ -10,16 +10,20 @@ from .utils import Indenter
 class ArmyAttackService:
     """
     Battle logic
+    Args:
+        attack_army: instance of army that attacks
     """
     def __init__(self, attack_army):
         self.attack_army = attack_army
         self.defence_army = None
         self.num_of_attacks = 0
         self.dead = False
+        self.webhook_service = WebhookService()
 
         self.lucky_value = random.randint(1, 100)
 
     def __enter__(self):
+        # tracking number of attacks army is making in one call
         self.num_of_attacks += 1
         return self
 
@@ -33,7 +37,11 @@ class ArmyAttackService:
         return self.defence_army
 
     def create(self):
-        """Saving battle to DB"""
+        """
+        Saving battle to DB
+        Returns:
+            instance of active battle
+        """
         self.attack_army.is_in_active_battle()
     
         battle = Battle(attack_army_id=self.attack_army.id,
@@ -52,7 +60,11 @@ class ArmyAttackService:
 
     def attack(self, battle):
         """
-        Determining if attack was successful
+        Making and etermining if attack was successful
+        Args:
+            battle: instance of active battle
+        Returns:
+            string 'success' or 'try_again' used to recognize outcome of attack
         """
         if self.num_of_attacks >= self.attack_army.number_squads:
             self.attack_army.is_in_active_battle()
@@ -88,12 +100,16 @@ class ArmyAttackService:
         return 'try_again'
 
     def _calculate_damage(self):
-        '''Calculating total damage'''
+        """Calculating total damage of attack"""
         damage = round(self.attack_army.number_squads / self.num_of_attacks)
         return damage
 
     def _update_armies(self, attack_damage):
-        '''Updating values in Army table after successful attack'''
+        """
+        Updating values in Army table after successful attack
+        Args:
+            attack_damage: vlaue of damage made to defence army
+        """
         DB.session.add(self.defence_army, self.attack_army)
         self.attack_army.is_in_active_battle()
         self.defence_army.set_defence_army_number_squads(attack_damage)
@@ -104,19 +120,26 @@ class ArmyAttackService:
                 self.defence_army.name.upper(), self.defence_army.number_squads))
 
     def _update_battle(self, battle, attack_damage):
-        '''Updating values in Battle table after successful attack'''
+        """
+        Updating values in Battle table after successful attack
+        Args:
+            battle: instance of active battle
+            attack_damge: vlaue of damage made to defence army
+        """
         DB.session.add(battle)
         battle.after_battle_update(self.num_of_attacks, attack_damage)
         DB.session.commit()
 
     def _trigger_webhooks(self):
-        """Triggering webhooks"""
-        webhook_service = WebhookService()
-
+        """
+        Triggering webhooks:
+            - army.update 
+            - army.leave(in case army is dead)
+        """
         # Triggering army.update webhook
-        webhook_service.create_army_update_webhook(self.attack_army)
-        webhook_service.create_army_update_webhook(self.defence_army)
+        self.webhook_service.create_army_update_webhook(self.attack_army)
+        self.webhook_service.create_army_update_webhook(self.defence_army)
 
         # army.leave webhook in case army died
         if self.dead:
-            webhook_service.create_army_leave_webhook(self.defence_army, leave_type='die')
+            self.webhook_service.create_army_leave_webhook(self.defence_army, leave_type='die')

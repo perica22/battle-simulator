@@ -42,9 +42,9 @@ def client(client):
 
 @APP.route('/<client_name>/webhook', methods=['POST'])
 def client_webhook(client_name):
-    '''
+    """
     Route for receiving webhooks 
-    '''
+    """
     #finding the right instance of client
     client = [army for army in CLIENTS if army.name == client_name][0]
     request_json = request.get_json()
