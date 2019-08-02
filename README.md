@@ -38,10 +38,11 @@ You should have an automated system, which will run Server and at least 5 client
 The Server app is always available and any client can connect to it. The client connects to the server by using the join API. The server will provide a client with an accessToken upon join which will be used to allow Client the access to the Server.
 
 On joining, the client is obligated to provide the Server with
+```
     - Name
     - Number of squads (min 10 max 100)
     - Webhook URL
-
+```
 Upon a successful join, a record for that army will be stored in the database.
 To start the battle there must be at least one more Army alive and registered in the server app.
 
@@ -56,10 +57,11 @@ The purpose of the client is to decide who to attack and speed of the attack. Ba
 
 #### Strategy
 The client will choose an army to attack based on its initial setting. Value of this setting can be
+```
     - Weakest (lowest number of squads)
     - Strongest (highest number of squads)
     - Random
-
+```
 Based on the strategy, the client will decide which army to attack from the pool of the armies.
 Clients cannot change strategy once the battle starts.
 
@@ -93,7 +95,7 @@ NOTE: If a client has 14 squads, do a floor and use 10 for reload time mathemati
 The army is dead when all squads are dead. 
 
 ### Server API Routes
-
+```
     POST {serverURL}/api/join (optional ?accessToken={accessToken})
     API route to register client/army
 
@@ -103,28 +105,32 @@ The army is dead when all squads are dead.
 
     PUT {serverURL}/api/leave?accessToken={accessToken}
     API route to leave the battle. To join back, and not register a new army, use join with the accessToken
-
+```
 ### Server Webhooks
 
 #### army.join
 Sent when an army joins the battle. This event is sent to all alive and registered clients.
 Data
+```
     - armyId (id of the joined army)
     - squadsCount (number of squads army have)
     - Type of join (new or returned)
-
+```
 #### army.leave
 Sent when an army activates stop function, leave the game or die. This event is sent to all alive and registered clients.
 Data
+```
     - armyId
     - Type of leave
-
+```
 #### army.update
 Sent every time an army is updated by being attacked or by successfully attacking.
 Data
+```
     - armyId id of the army who was attacked or completed a successful attacking.
     - squadsCount
     - rankRate
+```
 NOTE: This event is sent to the client who received damage and based on armyId he should know it was him who received damage.
 
 #### Additional notes
